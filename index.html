@@ -342,14 +342,42 @@
 
   <script>
     (function () {
-      const SEGMENTS = 24;
+      const USE_BOOK_PALETTE = true;
+      const SEGMENTS = 12;
       const RINGS = 10;
+      const RENDERED_RINGS = RINGS - 2;
       const SATURATION = 1;
       const FINE_OFFSETS = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1];
       const HARMONY_GROUPS = [
         { name: "Complementary", offsets: [180] },
         { name: "Triadic", offsets: [120, -120] },
         { name: "Analogous", offsets: [30, -30] }
+      ];
+      const BOOK_WHEEL = [
+        ["#8C0000", "#BF0000", "#D90000", "#FF0000", "#FF264D", "#FF5980", "#FF8CB2", "#FFCCE6"],
+        ["#8C0E1C", "#BF1326", "#D9162B", "#FF1A33", "#FF4D59", "#FF7380", "#FF99A6", "#FFCCCC"],
+        ["#8C3800", "#BF6600", "#D97A00", "#FFA300", "#FF8033", "#FF9966", "#FFBF99", "#FFD9CC"],
+        ["#8C5400", "#BF8F00", "#D9A300", "#FFCC00", "#FFB333", "#FFBF66", "#FFD999", "#FFE6CC"],
+        ["#8C8C00", "#BFBF00", "#D9D900", "#FFFF00", "#FFFF33", "#FFFF66", "#FFFF99", "#FFFFBF"],
+        ["#385C00", "#669900", "#7AB300", "#99FF00", "#80FF33", "#A6FF66", "#BFFF99", "#E0FFCC"],
+        ["#005C0E", "#009926", "#00B32B", "#00FF33", "#33FF40", "#66FF73", "#8CFFA6", "#BFFFD9"],
+        ["#005C54", "#00998F", "#00B3A3", "#00FFCC", "#33FFD9", "#66FFE0", "#8CFFE6", "#BFFFE6"],
+        ["#002E8C", "#004DBF", "#0059D9", "#0066FF", "#267FFF", "#5999FF", "#80BFFF", "#B3D9FF"],
+        ["#00178C", "#0026BF", "#002BD9", "#001AFF", "#2633FF", "#4059FF", "#6673FF", "#8CA6FF"],
+        ["#1C008C", "#3300BF", "#3D00D9", "#3300FF", "#5933FF", "#7373FF", "#9999FF", "#BFB3FF"],
+        ["#54008C", "#8F00BF", "#A300D9", "#CC00FF", "#D933FF", "#E666FF", "#E699FF", "#F2CCFF"]
+      ];
+      const BOOK_GRAYS = [
+        "#E6E6E6",
+        "#CCCCCC",
+        "#B3B3B3",
+        "#A6A6A6",
+        "#8C8C8C",
+        "#737373",
+        "#595959",
+        "#404040",
+        "#262626",
+        "#000000"
       ];
 
       const state = {
@@ -393,7 +421,7 @@
       }
 
       function brightnessForRing(ringIndex) {
-        const linear = 1 - ringIndex / (RINGS - 1);
+        const linear = 1 - ringIndex / (RENDERED_RINGS - 1);
         return 0.1 + 0.9 * Math.pow(linear, 0.8);
       }
 
@@ -426,6 +454,44 @@
       function rgbToHex(rgb) {
         const toHex = (n) => n.toString(16).padStart(2, "0").toUpperCase();
         return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
+      }
+
+      function hexToRgb(hex) {
+        if (!hex || typeof hex !== "string") {
+          return null;
+        }
+        const cleaned = hex.replace("#", "").trim();
+        if (cleaned.length === 3) {
+          const r = parseInt(cleaned[0] + cleaned[0], 16);
+          const g = parseInt(cleaned[1] + cleaned[1], 16);
+          const b = parseInt(cleaned[2] + cleaned[2], 16);
+          return { r, g, b };
+        }
+        if (cleaned.length !== 6) {
+          return null;
+        }
+        const r = parseInt(cleaned.slice(0, 2), 16);
+        const g = parseInt(cleaned.slice(2, 4), 16);
+        const b = parseInt(cleaned.slice(4, 6), 16);
+        if ([r, g, b].some((value) => Number.isNaN(value))) {
+          return null;
+        }
+        return { r, g, b };
+      }
+
+      function paletteRgbFor(hue, ringIndex) {
+        if (!USE_BOOK_PALETTE) {
+          return null;
+        }
+        const segment = Math.floor(wrapHue(hue) * 12);
+        const ring = clamp(ringIndex, 0, RENDERED_RINGS - 1);
+        const paletteRing = 7 - ring;
+        const row = BOOK_WHEEL[segment];
+        if (!row) {
+          return null;
+        }
+        const hex = row[paletteRing];
+        return hex ? hexToRgb(hex) : null;
       }
 
       function rgbToHsl(r, g, b) {
@@ -465,7 +531,9 @@
       }
 
       function selectionColor() {
-        return hsbToRgb(state.hue, SATURATION, state.brightness);
+        const ring = getNearestRingForBrightness(state.brightness);
+        const paletteRgb = paletteRgbFor(state.hue, ring);
+        return paletteRgb || hsbToRgb(state.hue, SATURATION, state.brightness);
       }
 
       function selectionHex() {
@@ -552,8 +620,8 @@
         state.center = pixelSize / 2;
         state.radius = pixelSize / 2;
         state.innerRadius = state.radius * 0.3;
-        state.wheelThickness = state.radius - state.innerRadius;
-        state.ringWidth = state.wheelThickness / RINGS;
+        state.wheelThickness = ((state.radius - state.innerRadius) * RENDERED_RINGS) / RINGS;
+        state.ringWidth = state.wheelThickness / RENDERED_RINGS;
 
         canvas.width = pixelSize;
         canvas.height = pixelSize;
@@ -569,20 +637,22 @@
         bctx.clearRect(0, 0, state.size, state.size);
         const center = state.center;
 
-        for (let ring = 0; ring < RINGS; ring += 1) {
+        // Render only the inner rings so the two outermost bands are removed.
+        for (let ring = 0; ring < RENDERED_RINGS; ring += 1) {
           const inner = state.innerRadius + ring * state.ringWidth;
-          const outer = inner + state.ringWidth;
+          const outer = state.innerRadius + (ring + 1) * state.ringWidth;
           const brightness = brightnessForRing(ring);
 
           for (let segment = 0; segment < SEGMENTS; segment += 1) {
             const start = -Math.PI / 2 + segment * state.segmentStep;
             const end = start + state.segmentStep;
             const hue = segment / SEGMENTS;
-            const rgb = hsbToRgb(hue, SATURATION, brightness);
+            const paletteRgb = paletteRgbFor(hue, ring);
+            const rgb = paletteRgb || hsbToRgb(hue, SATURATION, brightness);
 
             bctx.beginPath();
-            bctx.arc(center, center, outer + 0.75, start - 0.0015, end + 0.0015);
-            bctx.arc(center, center, Math.max(0, inner - 0.75), end + 0.0015, start - 0.0015, true);
+            bctx.arc(center, center, outer, start, end);
+            bctx.arc(center, center, Math.max(0, inner), end, start, true);
             bctx.closePath();
             bctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
             bctx.fill();
@@ -604,7 +674,7 @@
         let bestRing = 0;
         let bestDiff = Infinity;
 
-        for (let ring = 0; ring < RINGS; ring += 1) {
+        for (let ring = 0; ring < RENDERED_RINGS; ring += 1) {
           const diff = Math.abs(brightness - brightnessForRing(ring));
           if (diff < bestDiff) {
             bestDiff = diff;
@@ -763,7 +833,8 @@
             const hue = wrapHue(state.hue + offset / 360);
             const segment = segmentForHue(hue);
             const segmentHue = segment / SEGMENTS;
-            const rgb = hsbToRgb(segmentHue, SATURATION, harmonyBrightness);
+            const paletteRgb = paletteRgbFor(segmentHue, ring);
+            const rgb = paletteRgb || hsbToRgb(segmentHue, SATURATION, harmonyBrightness);
             const hex = rgbToHex(rgb);
             state.harmonyPoints.push({ segment, ring, hex });
             swatches.appendChild(makeChip(hex, function () {
@@ -784,17 +855,26 @@
         const y = clientY - rect.top;
         const cssRadius = rect.width / 2;
         const innerRadiusCss = (state.innerRadius / state.radius) * cssRadius;
-        const thicknessCss = cssRadius - innerRadiusCss;
+        const thicknessCss = (state.wheelThickness / state.radius) * cssRadius;
+        const renderedRings = RENDERED_RINGS;
+        const outerRenderedCss = innerRadiusCss + thicknessCss;
         const dx = x - cssRadius;
         const dy = y - cssRadius;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance > cssRadius || distance < innerRadiusCss) {
+        // Ignore the two outermost rings by clamping hit-testing to rendered thickness.
+        if (distance > outerRenderedCss || distance < innerRadiusCss) {
           return null;
         }
 
         const normalized = (distance - innerRadiusCss) / thicknessCss;
-        const ring = clamp(Math.floor(normalized * RINGS), 0, RINGS - 1);
+        if (normalized < 0 || normalized >= 1) {
+          return null;
+        }
+        const ring = Math.floor(normalized * renderedRings);
+        if (ring < 0 || ring >= renderedRings) {
+          return null;
+        }
         const brightness = brightnessForRing(ring);
 
         let angle = Math.atan2(dy, dx) + Math.PI / 2;
@@ -826,7 +906,8 @@
           return;
         }
 
-        const rgb = hsbToRgb(picked.hue, SATURATION, picked.brightness);
+        const paletteRgb = paletteRgbFor(picked.hue, picked.ring);
+        const rgb = paletteRgb || hsbToRgb(picked.hue, SATURATION, picked.brightness);
         const hex = rgbToHex(rgb);
         showCanvasTip(hex, event.clientX, event.clientY - 6);
       }
@@ -837,7 +918,7 @@
           return;
         }
         setSelection(picked.hue, picked.brightness, true);
-        copyHexValue(rgbToHex(hsbToRgb(picked.hue, SATURATION, picked.brightness)), false);
+        copyHexValue(selectionHex(), false);
       }
 
       async function copyHex() {
