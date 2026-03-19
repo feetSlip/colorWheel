@@ -6,13 +6,19 @@
   <title>Color Wheel Tool</title>
   <style>
     :root {
-      --bg: #f1f2f4;
+      --bg: #f2f2ec;
+      --paper: #f7f4eb;
       --panel: #ffffff;
-      --border: #d9dde3;
-      --text: #1f2937;
-      --muted: #5b6472;
-      --focus: #111827;
-      --radius: 12px;
+      --line: #111111;
+      --text: #111111;
+      --muted: #4a4a4a;
+      --red: #d7261e;
+      --blue: #1155cc;
+      --yellow: #f2c300;
+      --gray-1: #e6e1d7;
+      --gray-2: #c8c2b8;
+      --gray-3: #7f7b74;
+      --focus: #111111;
     }
 
     * {
@@ -21,160 +27,348 @@
 
     body {
       margin: 0;
-      font-family: "Inter", "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+      font-family: "Futura", "Montserrat", "Avenir Next", "Segoe UI", sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 20px;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden;
+      letter-spacing: 0.01em;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      width: min(26vw, 320px);
+      height: min(26vw, 320px);
+      border: 8px solid var(--line);
+      background: var(--yellow);
+      top: -72px;
+      right: -96px;
+    }
+
+    body::after {
+      width: 0;
+      height: 0;
+      border-left: 0 solid transparent;
+      border-right: 160px solid transparent;
+      border-bottom: 240px solid var(--red);
+      left: -18px;
+      bottom: 36px;
+      transform: rotate(-12deg);
     }
 
     .app {
-      max-width: 1100px;
+      max-width: 1240px;
       margin: 0 auto;
       display: grid;
-      gap: 16px;
+      gap: 18px;
+      position: relative;
+      z-index: 1;
     }
 
     header {
-      border: 1px solid var(--border);
-      background: var(--panel);
-      border-radius: var(--radius);
-      padding: 16px 18px;
+      border: 4px solid var(--line);
+      background: var(--paper);
+      padding: 18px 24px 16px 112px;
       display: grid;
-      gap: 6px;
+      gap: 4px;
+      min-height: 108px;
+      align-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before,
+    header::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+    }
+
+    header::before {
+      width: 108px;
+      height: 108px;
+      border: 4px solid var(--line);
+      background: var(--blue);
+      left: -24px;
+      top: 10px;
+      transform: rotate(45deg);
+    }
+
+    header::after {
+      width: 34px;
+      height: 34px;
+      background: var(--red);
+      right: 26px;
+      top: 18px;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(1.2rem, 1.4vw + 1rem, 1.8rem);
-      font-weight: 650;
-      letter-spacing: -0.01em;
+      font-size: clamp(2rem, 3vw, 3.6rem);
+      font-weight: 800;
+      line-height: 0.95;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      max-width: 7ch;
     }
 
     .subtitle {
       margin: 0;
       color: var(--muted);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      max-width: 34ch;
+      text-transform: uppercase;
+      line-height: 1.35;
+      position: absolute;
+      right: 24px;
+      bottom: 14px;
+      text-align: right;
     }
 
     main {
       display: grid;
-      grid-template-columns: minmax(280px, 1fr) minmax(280px, 360px);
-      gap: 16px;
+      grid-template-columns: minmax(360px, 1.45fr) minmax(280px, 0.78fr);
+      gap: 18px;
+      align-items: stretch;
     }
 
     .wheel-section,
     .info-panel,
-    .fine-adjustments,
     .harmony-section {
-      border: 1px solid var(--border);
+      border: 4px solid var(--line);
       background: var(--panel);
-      border-radius: var(--radius);
+      position: relative;
+      overflow: hidden;
     }
 
     .wheel-section {
-      padding: 14px;
-      position: relative;
-      min-height: 320px;
+      padding: 24px 24px 20px;
+      min-height: 580px;
       display: grid;
-      place-items: center;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      column-gap: clamp(18px, 3vw, 36px);
+      background: var(--paper);
+      height: 100%;
+    }
+
+    .wheel-section::before,
+    .wheel-section::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .wheel-section::before {
+      width: 92px;
+      height: 92px;
+      background: var(--red);
+      border: 4px solid var(--line);
+      top: 18px;
+      left: 18px;
+    }
+
+    .wheel-section::after {
+      content: none;
+    }
+
+    .wheel-wrap {
+      width: min(100%, 590px);
+      aspect-ratio: 1 / 1;
+      position: relative;
+      justify-self: center;
+      grid-column: 2;
+      z-index: 2;
+      padding: 20px;
+      background: transparent;
     }
 
     #wheel {
-      width: min(100%, 560px);
+      width: 100%;
+      max-width: 100%;
       aspect-ratio: 1 / 1;
       display: block;
       cursor: crosshair;
-      border-radius: 999px;
+      background: transparent;
       outline: none;
     }
 
+    .grayscale-bar {
+      width: clamp(28px, 5vw, 40px);
+      height: clamp(220px, 34vw, 290px);
+      display: grid;
+      grid-template-rows: repeat(10, minmax(0, 1fr));
+      gap: 6px;
+      padding: 8px;
+      border: 4px solid var(--line);
+      background: var(--yellow);
+      align-self: end;
+      justify-self: start;
+      z-index: 2;
+    }
+
+    .gray-chip {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      border: 2px solid var(--line);
+      padding: 0;
+      position: relative;
+      appearance: none;
+    }
+
+    .gray-chip.is-selected {
+      outline: 4px solid var(--red);
+      outline-offset: 2px;
+    }
+
+    .gray-chip[data-tip]:hover::after,
+    .gray-chip[data-tip]:focus-visible::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--line);
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-family: "SF Mono", "Roboto Mono", "Menlo", monospace;
+      padding: 5px 7px;
+      white-space: nowrap;
+      z-index: 20;
+      pointer-events: none;
+      border: 2px solid #ffffff;
+    }
+
     .info-panel {
-      padding: 14px;
+      padding: 18px;
       display: grid;
       grid-template-rows: auto auto 1fr;
-      gap: 14px;
+      gap: 18px;
       align-content: start;
+      background: var(--panel);
+      height: 100%;
     }
 
     .preview {
       width: 100%;
       aspect-ratio: 1 / 1;
-      border-radius: 10px;
-      border: 1px solid var(--border);
+      border: 4px solid var(--line);
       background: #ff0000;
+      position: relative;
+    }
+
+    .preview::after {
+      content: none;
     }
 
     .stats {
       display: grid;
-      gap: 8px;
+      gap: 0;
       font-size: 0.95rem;
+      border: 4px solid var(--line);
+      background: var(--paper);
     }
 
     .stat-row {
       display: grid;
-      grid-template-columns: 98px 1fr;
-      gap: 12px;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 0;
       align-items: center;
-      min-height: 22px;
+      min-height: 54px;
+      border-top: 2px solid var(--line);
+    }
+
+    .stat-row:first-child {
+      border-top: 0;
     }
 
     .label {
-      color: var(--muted);
-      font-size: 0.86rem;
+      color: var(--line);
+      font-size: 0.84rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0 12px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      min-width: 112px;
+      max-width: 112px;
+      border-right: 2px solid var(--line);
+      background: var(--yellow);
     }
 
     .value {
       font-family: "SF Mono", "Roboto Mono", "Menlo", monospace;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      padding: 0 14px;
+      min-width: 0;
     }
 
     .actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-top: 4px;
     }
 
     button {
-      height: 40px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #fafbfc;
+      min-height: 46px;
+      border: 3px solid var(--line);
+      background: #ffffff;
       color: var(--text);
-      font-size: 0.9rem;
-      font-weight: 600;
+      font-size: 0.88rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
       cursor: pointer;
-      transition: transform 140ms ease, background-color 140ms ease;
+      transition: background-color 100ms ease, color 100ms ease;
+      box-shadow: none;
     }
 
     button:hover {
-      background: #f2f4f7;
-      transform: translateY(-1px);
+      background: var(--line);
+      color: #ffffff;
     }
 
     button:focus-visible,
     #wheel:focus-visible {
-      outline: 2px solid var(--focus);
+      outline: 4px solid var(--blue);
       outline-offset: 2px;
+    }
+
+    button:disabled {
+      background: var(--gray-1);
+      color: var(--gray-3);
+      cursor: not-allowed;
     }
 
     .section-title {
       margin: 0;
-      font-size: 0.9rem;
-      color: var(--muted);
-      font-weight: 600;
-      letter-spacing: 0.01em;
+      font-size: 1rem;
+      color: var(--line);
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
     }
 
-    .fine-adjustments,
     .harmony-section {
-      padding: 12px;
+      padding: 18px;
       display: grid;
-      gap: 10px;
+      gap: 14px;
+      background: var(--paper);
     }
 
     .swatch-row {
@@ -184,16 +378,16 @@
     }
 
     .chip {
-      height: 34px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
+      height: 56px;
+      border: 3px solid var(--line);
       cursor: pointer;
-      transition: transform 140ms ease;
+      transition: transform 100ms ease;
       position: relative;
+      min-height: 56px;
     }
 
     .chip:hover {
-      transform: scale(1.03);
+      transform: translate(-3px, -3px);
     }
 
     .chip[data-tip]:hover::after,
@@ -203,70 +397,116 @@
       left: 50%;
       bottom: calc(100% + 8px);
       transform: translateX(-50%);
-      background: #1f2937;
+      background: var(--line);
       color: #ffffff;
       font-size: 0.75rem;
       font-family: "SF Mono", "Roboto Mono", "Menlo", monospace;
-      border-radius: 6px;
-      padding: 4px 6px;
+      padding: 5px 7px;
       white-space: nowrap;
       z-index: 20;
       pointer-events: none;
+      border: 2px solid #ffffff;
     }
 
     .harmony-grid {
       display: grid;
-      gap: 10px;
+      gap: 12px;
     }
 
     .harmony-line {
       display: grid;
-      grid-template-columns: 118px 1fr;
+      grid-template-columns: 134px 1fr;
       align-items: center;
-      gap: 10px;
+      gap: 0;
+      border: 4px solid var(--line);
+      background: #ffffff;
     }
 
     .harmony-label {
-      color: var(--muted);
-      font-size: 0.86rem;
-      font-weight: 600;
+      color: var(--line);
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 14px 12px;
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      background: var(--yellow);
+      border-right: 4px solid var(--line);
     }
 
     .harmony-swatches {
       display: grid;
-      gap: 8px;
+      gap: 0;
       grid-auto-flow: column;
       grid-auto-columns: minmax(0, 1fr);
+      padding: 0;
+    }
+
+    .harmony-swatches .chip + .chip {
+      border-left-width: 0;
     }
 
     .canvas-tip {
       position: fixed;
-      background: #1f2937;
+      background: var(--line);
       color: #ffffff;
       font-size: 0.75rem;
       font-family: "SF Mono", "Roboto Mono", "Menlo", monospace;
-      border-radius: 6px;
-      padding: 4px 6px;
+      padding: 5px 8px;
       pointer-events: none;
       opacity: 0;
       transform: translate(-50%, -130%);
       transition: opacity 120ms ease;
       z-index: 40;
+      border: 2px solid #ffffff;
     }
 
     .canvas-tip.show {
       opacity: 1;
     }
 
+    #copyBtn {
+      background: var(--red);
+      color: #ffffff;
+    }
+
+    #copyBtn:hover:not(:disabled) {
+      background: #ffffff;
+      color: var(--line);
+    }
+
+    #downloadBtn {
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    #downloadBtn:hover {
+      background: var(--yellow);
+      color: var(--line);
+    }
+
     @media (max-width: 900px) {
+      body {
+        padding: 16px;
+      }
+
       main {
         grid-template-columns: 1fr;
+      }
+
+      .wheel-section {
+        min-height: 0;
+        height: auto;
       }
 
       .info-panel {
         grid-template-columns: 110px 1fr;
         grid-template-rows: auto auto;
         align-items: start;
+        height: auto;
       }
 
       .preview {
@@ -283,16 +523,101 @@
         padding: 12px;
       }
 
-      .swatch-row {
-        gap: 6px;
+      body::before {
+        width: 160px;
+        height: 160px;
+        right: -72px;
+        top: -54px;
       }
 
-      .chip {
-        height: 30px;
+      body::after {
+        border-right-width: 96px;
+        border-bottom-width: 140px;
+      }
+
+      header {
+        padding: 94px 16px 14px 16px;
+        min-height: 0;
+      }
+
+      header::before {
+        width: 88px;
+        height: 88px;
+        left: 10px;
+        top: -16px;
+      }
+
+      header::after {
+        width: 24px;
+        height: 24px;
+        right: 14px;
+        top: 14px;
+      }
+
+      h1 {
+        max-width: none;
+        font-size: clamp(1.8rem, 9vw, 2.6rem);
+      }
+
+      .subtitle {
+        right: 16px;
+        bottom: 12px;
+        max-width: 26ch;
+      }
+
+      .wheel-section {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        justify-items: center;
+        padding: 18px 14px 14px;
+      }
+
+      .wheel-wrap {
+        grid-column: 1;
+        width: min(100%, 540px);
+        padding: 14px;
+      }
+
+      .grayscale-bar {
+        grid-row: 2;
+        justify-self: start;
+        margin-left: 0;
+        margin-top: 12px;
+        width: min(100%, 320px);
+        height: auto;
+        grid-template-rows: none;
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+      }
+
+      .gray-chip {
+        min-height: 32px;
+      }
+
+      .info-panel {
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+      }
+
+      .preview {
+        width: 100%;
+      }
+
+      .stat-row {
+        grid-template-columns: minmax(92px, auto) minmax(0, 1fr);
       }
 
       .harmony-line {
         grid-template-columns: 1fr;
+      }
+
+      .harmony-label {
+        border-right: 0;
+        border-bottom: 4px solid var(--line);
+      }
+
+      .chip {
+        height: 48px;
+        min-height: 48px;
       }
     }
   </style>
@@ -301,12 +626,15 @@
   <div class="app">
     <header>
       <h1>Color Wheel Tool</h1>
-      <p class="subtitle">HSB wheel with fine adjustments, harmony swatches, and export-ready color details.</p>
+      <p class="subtitle">HSB wheel with harmony swatches and export-ready color details.</p>
     </header>
 
     <main>
       <section class="wheel-section" aria-label="Color Wheel">
-        <canvas id="wheel" tabindex="0" aria-label="Color wheel canvas"></canvas>
+        <div id="grayscaleBar" class="grayscale-bar" aria-label="Grayscale colors"></div>
+        <div class="wheel-wrap">
+          <canvas id="wheel" tabindex="0" aria-label="Color wheel canvas"></canvas>
+        </div>
       </section>
 
       <section class="info-panel" aria-label="Selected Color Information">
@@ -327,10 +655,7 @@
       </section>
     </main>
 
-    <section class="fine-adjustments" aria-label="Fine Adjustments">
-      <h2 class="section-title">Fine Adjustments</h2>
-      <div id="fineRow" class="swatch-row"></div>
-    </section>
+    <!-- Fine Adjustments section removed -->
 
     <section class="harmony-section" aria-label="Harmony Colors">
       <h2 class="section-title">Harmony</h2>
@@ -343,31 +668,14 @@
   <script>
     (function () {
       const USE_BOOK_PALETTE = true;
-      const SEGMENTS = 12;
-      const RINGS = 10;
-      const RENDERED_RINGS = RINGS - 2;
+      const HUE_SEGMENTS = 12;
+      const SEGMENTS = HUE_SEGMENTS;
+      const RINGS = 8;
       const SATURATION = 1;
-      const FINE_OFFSETS = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1];
-      const HARMONY_GROUPS = [
-        { name: "Complementary", offsets: [180] },
-        { name: "Triadic", offsets: [120, -120] },
-        { name: "Analogous", offsets: [30, -30] }
-      ];
-      const BOOK_WHEEL = [
-        ["#8C0000", "#BF0000", "#D90000", "#FF0000", "#FF264D", "#FF5980", "#FF8CB2", "#FFCCE6"],
-        ["#8C0E1C", "#BF1326", "#D9162B", "#FF1A33", "#FF4D59", "#FF7380", "#FF99A6", "#FFCCCC"],
-        ["#8C3800", "#BF6600", "#D97A00", "#FFA300", "#FF8033", "#FF9966", "#FFBF99", "#FFD9CC"],
-        ["#8C5400", "#BF8F00", "#D9A300", "#FFCC00", "#FFB333", "#FFBF66", "#FFD999", "#FFE6CC"],
-        ["#8C8C00", "#BFBF00", "#D9D900", "#FFFF00", "#FFFF33", "#FFFF66", "#FFFF99", "#FFFFBF"],
-        ["#385C00", "#669900", "#7AB300", "#99FF00", "#80FF33", "#A6FF66", "#BFFF99", "#E0FFCC"],
-        ["#005C0E", "#009926", "#00B32B", "#00FF33", "#33FF40", "#66FF73", "#8CFFA6", "#BFFFD9"],
-        ["#005C54", "#00998F", "#00B3A3", "#00FFCC", "#33FFD9", "#66FFE0", "#8CFFE6", "#BFFFE6"],
-        ["#002E8C", "#004DBF", "#0059D9", "#0066FF", "#267FFF", "#5999FF", "#80BFFF", "#B3D9FF"],
-        ["#00178C", "#0026BF", "#002BD9", "#001AFF", "#2633FF", "#4059FF", "#6673FF", "#8CA6FF"],
-        ["#1C008C", "#3300BF", "#3D00D9", "#3300FF", "#5933FF", "#7373FF", "#9999FF", "#BFB3FF"],
-        ["#54008C", "#8F00BF", "#A300D9", "#CC00FF", "#D933FF", "#E666FF", "#E699FF", "#F2CCFF"]
-      ];
-      const BOOK_GRAYS = [
+      const TAU = Math.PI * 2;
+      const START_ANGLE = -Math.PI / 2;
+      const GEOMETRY_EPSILON = 1e-6;
+      const GRAYSCALE_VALUES = [
         "#E6E6E6",
         "#CCCCCC",
         "#B3B3B3",
@@ -379,10 +687,32 @@
         "#262626",
         "#000000"
       ];
+      const HARMONY_GROUPS = [
+        { name: "Complementary", offsets: [180] },
+        { name: "Triadic", offsets: [120, -120] },
+        { name: "Analogous", offsets: [30, -30] }
+      ];
+      const BOOK_WHEEL = [
+        ["#8C0000", "#BF0000", "#D90000", "#FF0000", "#FF264D", "#FF5980", "#FF8CB2", "#FFCCE6"],
+        ["#8C0E1C", "#BF1326", "#D9162B", "#FF1A33", "#FF4D59", "#FF7380", "#FF99A6", "#FFCCCC"],
+        ["#8C3800", "#BF4D00", "#D95700", "#FF6600", "#FF8033", "#FF9966", "#FFBF99", "#FFD9CC"],
+        ["#8C5400", "#BF7300", "#D98200", "#FF9900", "#FFB333", "#FFBF66", "#FFD999", "#FFE6CC"],
+        ["#8C8C00", "#BFBF00", "#D9D900", "#FFFF00", "#FFFF33", "#FFFF66", "#FFFF99", "#FFFFBF"],
+        ["#388C00", "#4CBF00", "#57D900", "#66FF00", "#80FF33", "#A6FF66", "#BFFF99", "#E0FFCC"],
+        ["#008C0E", "#00BF13", "#00D916", "#00FF19", "#33FF40", "#66FF73", "#8CFFA6", "#BFFFCC"],
+        ["#008C54", "#00BF73", "#00D982", "#00FF99", "#33FFB2", "#66FFBF", "#8CFFCC", "#BFFFE6"],
+        ["#00388C", "#004CBF", "#0057D9", "#0066FF", "#2680FF", "#5999FF", "#80BFFF", "#B2D9FF"],
+        ["#000E8C", "#0013BF", "#0016D9", "#0019FF", "#2633FF", "#4059FF", "#6673FF", "#8C99FF"],
+        ["#1C008C", "#2600BF", "#2B00D9", "#3300FF", "#5926FF", "#7359FF", "#9980FF", "#BFB2FF"],
+        ["#54008C", "#7300BF", "#8200D9", "#9900FF", "#A633FF", "#BF66FF", "#CC99FF", "#E6CCFF"]
+      ];
 
       const state = {
         hue: 0,
         brightness: 1,
+        selectedSegment: 0,
+        selectedGrayHex: "",
+        selectionMode: "wheel",
         hasExplicitSelection: false,
         harmonyPoints: [],
         dpr: window.devicePixelRatio || 1,
@@ -392,7 +722,10 @@
         innerRadius: 0,
         wheelThickness: 0,
         ringWidth: 0,
-        segmentStep: (Math.PI * 2) / SEGMENTS,
+        segmentStep: TAU / SEGMENTS,
+        segmentMidpointInset: 0,
+        ringRadii: [],
+        ringBrightnesses: [],
         wheelBuffer: document.createElement("canvas")
       };
 
@@ -405,11 +738,11 @@
       const hslValueEl = document.getElementById("hslValue");
       const hueValueEl = document.getElementById("hueValue");
       const brightnessValueEl = document.getElementById("brightnessValue");
-      const fineRowEl = document.getElementById("fineRow");
       const harmonyGridEl = document.getElementById("harmonyGrid");
       const copyBtn = document.getElementById("copyBtn");
       const downloadBtn = document.getElementById("downloadBtn");
       const canvasTip = document.getElementById("canvasTip");
+      const grayscaleBarEl = document.getElementById("grayscaleBar");
 
       function clamp(value, min, max) {
         return Math.min(max, Math.max(min, value));
@@ -420,9 +753,48 @@
         return wrapped < 0 ? wrapped + 1 : wrapped;
       }
 
+      function segmentSupportsHue(segment) {
+        return segment >= 0 && segment < HUE_SEGMENTS;
+      }
+
+      function hueForSegment(segment) {
+        return segmentSupportsHue(segment) ? segment / HUE_SEGMENTS : 0;
+      }
+
+      function segmentIndexForHue(hue) {
+        return Math.round(wrapHue(hue) * HUE_SEGMENTS) % HUE_SEGMENTS;
+      }
+
       function brightnessForRing(ringIndex) {
-        const linear = 1 - ringIndex / (RENDERED_RINGS - 1);
+        const linear = 1 - ringIndex / (RINGS - 1);
         return 0.1 + 0.9 * Math.pow(linear, 0.8);
+      }
+
+      function snapRadius(value) {
+        return Math.round(value * 2) / 2;
+      }
+
+      function normalizeAngle(angle) {
+        const wrapped = angle % TAU;
+        return wrapped < 0 ? wrapped + TAU : wrapped;
+      }
+
+      function angleForSegmentStart(segment) {
+        return START_ANGLE + segment * state.segmentStep;
+      }
+
+      function angleForSegmentMidpoint(segment) {
+        return angleForSegmentStart(segment) + state.segmentStep * 0.5;
+      }
+
+      function getRingGeometry(ring) {
+        const inner = state.ringRadii[ring];
+        const outer = state.ringRadii[ring + 1];
+        return {
+          inner,
+          outer,
+          mid: inner + (outer - inner) * 0.5
+        };
       }
 
       function hsbToRgb(h, s, v) {
@@ -479,19 +851,23 @@
         return { r, g, b };
       }
 
-      function paletteRgbFor(hue, ringIndex) {
+      function paletteRgbForSegment(segment, ringIndex) {
         if (!USE_BOOK_PALETTE) {
           return null;
         }
-        const segment = Math.floor(wrapHue(hue) * 12);
-        const ring = clamp(ringIndex, 0, RENDERED_RINGS - 1);
-        const paletteRing = 7 - ring;
+        const ring = clamp(ringIndex, 0, RINGS - 1);
         const row = BOOK_WHEEL[segment];
         if (!row) {
           return null;
         }
+        const paletteSteps = row.length - 1;
+        const paletteRing = paletteSteps - Math.round((ring / Math.max(1, RINGS - 1)) * paletteSteps);
         const hex = row[paletteRing];
         return hex ? hexToRgb(hex) : null;
+      }
+
+      function paletteRgbFor(hue, ringIndex) {
+        return paletteRgbForSegment(segmentIndexForHue(hue), ringIndex);
       }
 
       function rgbToHsl(r, g, b) {
@@ -531,9 +907,12 @@
       }
 
       function selectionColor() {
+        if (state.selectionMode === "grayscale" && state.selectedGrayHex) {
+          return hexToRgb(state.selectedGrayHex);
+        }
         const ring = getNearestRingForBrightness(state.brightness);
-        const paletteRgb = paletteRgbFor(state.hue, ring);
-        return paletteRgb || hsbToRgb(state.hue, SATURATION, state.brightness);
+        const paletteRgb = paletteRgbForSegment(state.selectedSegment, ring);
+        return paletteRgb || hsbToRgb(hueForSegment(state.selectedSegment), SATURATION, state.brightness);
       }
 
       function selectionHex() {
@@ -542,11 +921,23 @@
 
       function getQueryState() {
         const params = new URLSearchParams(window.location.search);
+        const gray = params.get("gray");
         const h = Number(params.get("h"));
         const b = Number(params.get("b"));
 
+        if (gray) {
+          const normalizedGray = `#${gray.replace("#", "").toUpperCase()}`;
+          if (GRAYSCALE_VALUES.includes(normalizedGray)) {
+            state.selectedGrayHex = normalizedGray;
+            state.selectionMode = "grayscale";
+            return;
+          }
+        }
+
         if (!Number.isNaN(h)) {
           state.hue = wrapHue(h / 360);
+          state.selectedSegment = segmentIndexForHue(state.hue);
+          state.selectionMode = "wheel";
         }
 
         if (!Number.isNaN(b)) {
@@ -556,8 +947,15 @@
 
       function updateUrl() {
         const params = new URLSearchParams(window.location.search);
-        params.set("h", String(Math.round(state.hue * 360)));
-        params.set("b", state.brightness.toFixed(3));
+        if (state.selectionMode === "grayscale" && state.selectedGrayHex) {
+          params.set("gray", state.selectedGrayHex.slice(1));
+          params.delete("h");
+          params.delete("b");
+        } else {
+          params.set("h", String(Math.round(state.hue * 360)));
+          params.set("b", state.brightness.toFixed(3));
+          params.delete("gray");
+        }
         const query = params.toString();
         const next = `${window.location.pathname}?${query}`;
         window.history.replaceState(null, "", next);
@@ -570,12 +968,51 @@
       }
 
       function setSelection(h, b, explicit) {
-        state.hue = wrapHue(h);
+        state.selectedSegment = segmentIndexForHue(h);
+        state.hue = hueForSegment(state.selectedSegment);
         state.brightness = clamp(b, 0.1, 1);
+        state.selectionMode = "wheel";
+        state.selectedGrayHex = "";
         renderHarmony();
         renderSelectionLayer();
         renderInfoPanel();
-        renderFineAdjustments();
+        renderGrayscaleBar();
+        if (explicit === true) {
+          state.hasExplicitSelection = true;
+        }
+        updateCopyButtonState();
+        updateUrl();
+      }
+
+      function setSelectionBySegment(segment, b, explicit) {
+        state.selectedSegment = clamp(segment, 0, SEGMENTS - 1);
+        state.hue = hueForSegment(state.selectedSegment);
+        state.brightness = clamp(b, 0.1, 1);
+        state.selectionMode = "wheel";
+        state.selectedGrayHex = "";
+        renderHarmony();
+        renderSelectionLayer();
+        renderInfoPanel();
+        renderGrayscaleBar();
+        if (explicit === true) {
+          state.hasExplicitSelection = true;
+        }
+        updateCopyButtonState();
+        updateUrl();
+      }
+
+      function setSelectionByGrayHex(hex, explicit) {
+        const rgb = hexToRgb(hex);
+        if (!rgb) {
+          return;
+        }
+        state.selectionMode = "grayscale";
+        state.selectedGrayHex = hex;
+        state.harmonyPoints = [];
+        renderHarmony();
+        renderSelectionLayer();
+        renderInfoPanel();
+        renderGrayscaleBar();
         if (explicit === true) {
           state.hasExplicitSelection = true;
         }
@@ -619,9 +1056,17 @@
         state.size = pixelSize;
         state.center = pixelSize / 2;
         state.radius = pixelSize / 2;
-        state.innerRadius = state.radius * 0.3;
-        state.wheelThickness = ((state.radius - state.innerRadius) * RENDERED_RINGS) / RINGS;
-        state.ringWidth = state.wheelThickness / RENDERED_RINGS;
+        state.innerRadius = snapRadius(state.radius * 0.3);
+        state.wheelThickness = snapRadius(state.radius - state.innerRadius);
+        state.ringWidth = state.wheelThickness / RINGS;
+        state.segmentMidpointInset = Math.min(state.segmentStep * 0.02, Math.PI / 720);
+        state.ringBrightnesses = Array.from({ length: RINGS }, function (_value, ring) {
+          return brightnessForRing(ring);
+        });
+        state.ringRadii = Array.from({ length: RINGS + 1 }, function (_value, index) {
+          const raw = state.innerRadius + index * state.ringWidth;
+          return index === RINGS ? state.radius : snapRadius(raw);
+        });
 
         canvas.width = pixelSize;
         canvas.height = pixelSize;
@@ -635,19 +1080,21 @@
       function drawWheelBitmap() {
         const bctx = state.wheelBuffer.getContext("2d");
         bctx.clearRect(0, 0, state.size, state.size);
+        bctx.globalCompositeOperation = "destination-over";
+        bctx.fillStyle = "rgba(0,0,0,0)";
+        bctx.fillRect(0, 0, state.size, state.size);
+        bctx.globalCompositeOperation = "source-over";
         const center = state.center;
 
-        // Render only the inner rings so the two outermost bands are removed.
-        for (let ring = 0; ring < RENDERED_RINGS; ring += 1) {
-          const inner = state.innerRadius + ring * state.ringWidth;
-          const outer = state.innerRadius + (ring + 1) * state.ringWidth;
-          const brightness = brightnessForRing(ring);
+        for (let ring = 0; ring < RINGS; ring += 1) {
+          const { inner, outer } = getRingGeometry(ring);
+          const brightness = state.ringBrightnesses[ring];
 
           for (let segment = 0; segment < SEGMENTS; segment += 1) {
-            const start = -Math.PI / 2 + segment * state.segmentStep;
+            const start = angleForSegmentStart(segment);
             const end = start + state.segmentStep;
-            const hue = segment / SEGMENTS;
-            const paletteRgb = paletteRgbFor(hue, ring);
+            const hue = hueForSegment(segment);
+            const paletteRgb = paletteRgbForSegment(segment, ring);
             const rgb = paletteRgb || hsbToRgb(hue, SATURATION, brightness);
 
             bctx.beginPath();
@@ -661,21 +1108,18 @@
       }
 
       function getCurrentIndices() {
-        const deg = state.hue * 360;
-        let segment = Math.round((deg % 360) / (360 / SEGMENTS)) % SEGMENTS;
-        if (segment < 0) {
-          segment += SEGMENTS;
-        }
-
-        return { segment, ring: getNearestRingForBrightness(state.brightness) };
+        return {
+          segment: clamp(state.selectedSegment, 0, SEGMENTS - 1),
+          ring: getNearestRingForBrightness(state.brightness)
+        };
       }
 
       function getNearestRingForBrightness(brightness) {
         let bestRing = 0;
         let bestDiff = Infinity;
 
-        for (let ring = 0; ring < RENDERED_RINGS; ring += 1) {
-          const diff = Math.abs(brightness - brightnessForRing(ring));
+        for (let ring = 0; ring < RINGS; ring += 1) {
+          const diff = Math.abs(brightness - state.ringBrightnesses[ring]);
           if (diff < bestDiff) {
             bestDiff = diff;
             bestRing = ring;
@@ -685,19 +1129,10 @@
         return bestRing;
       }
 
-      function segmentForHue(hue) {
-        return Math.floor(wrapHue(hue) * SEGMENTS) % SEGMENTS;
-      }
-
       function pointForSegmentRing(segment, ring) {
-        const inner = state.innerRadius + ring * state.ringWidth;
-        const outer = inner + state.ringWidth;
-        const start = -Math.PI / 2 + segment * state.segmentStep;
-        const end = start + state.segmentStep;
-        const angle = (start + end) * 0.5;
-        const numerator = (Math.pow(outer, 3) - Math.pow(inner, 3)) * (2 / 3);
-        const denominator = Math.pow(outer, 2) - Math.pow(inner, 2);
-        const radius = denominator === 0 ? inner : numerator / denominator;
+        const { inner, outer, mid } = getRingGeometry(ring);
+        const angle = angleForSegmentMidpoint(segment);
+        const radius = inner === outer ? mid : (2 / 3) * ((outer * outer * outer) - (inner * inner * inner)) / ((outer * outer) - (inner * inner));
         return {
           x: state.center + Math.cos(angle) * radius,
           y: state.center + Math.sin(angle) * radius
@@ -737,10 +1172,12 @@
       }
 
       function drawSelectionIndicator() {
+        if (state.selectionMode !== "wheel") {
+          return;
+        }
         const { segment, ring } = getCurrentIndices();
-        const inner = state.innerRadius + ring * state.ringWidth;
-        const outer = inner + state.ringWidth;
-        const start = -Math.PI / 2 + segment * state.segmentStep;
+        const { inner, outer } = getRingGeometry(ring);
+        const start = angleForSegmentStart(segment);
         const end = start + state.segmentStep;
 
         const drawStroke = (color, lineWidth) => {
@@ -771,14 +1208,15 @@
         const rgb = selectionColor();
         const hex = rgbToHex(rgb);
         const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-        const hueDeg = Math.round(state.hue * 360) % 360;
-        const brightnessPct = Math.round(state.brightness * 100);
+        const isGray = state.selectionMode === "grayscale";
+        const hueDeg = isGray ? 0 : Math.round(state.hue * 360) % 360;
+        const brightnessPct = isGray ? Math.round((Math.max(rgb.r, rgb.g, rgb.b) / 255) * 100) : Math.round(state.brightness * 100);
 
         previewEl.style.backgroundColor = hex;
         hexValueEl.textContent = hex;
         rgbValueEl.textContent = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
         hslValueEl.textContent = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
-        hueValueEl.textContent = `${hueDeg}deg`;
+        hueValueEl.textContent = isGray ? "Gray" : `${hueDeg}deg`;
         brightnessValueEl.textContent = `${brightnessPct}%`;
       }
 
@@ -793,30 +1231,14 @@
         return chip;
       }
 
-      function renderFineAdjustments() {
-        fineRowEl.textContent = "";
-
-        for (let i = 0; i < FINE_OFFSETS.length; i += 1) {
-          const offset = FINE_OFFSETS[i];
-          const hue = wrapHue(state.hue + offset / 360);
-          const spread = i - Math.floor(FINE_OFFSETS.length / 2);
-          const sat = offset === 0 ? SATURATION : clamp(0.9 + Math.abs(offset) * 0.1, 0.75, 1);
-          const brightness = offset === 0 ? state.brightness : clamp(state.brightness + spread * 0.02, 0.1, 1);
-          const rgb = hsbToRgb(hue, sat, brightness);
-          const hex = rgbToHex(rgb);
-
-          fineRowEl.appendChild(makeChip(hex, function () {
-            setSelection(hue, state.brightness, true);
-            copyHexValue(hex, false);
-          }));
-        }
-      }
-
       function renderHarmony() {
         harmonyGridEl.textContent = "";
         state.harmonyPoints = [];
-        const ring = getNearestRingForBrightness(state.brightness);
-        const harmonyBrightness = brightnessForRing(ring);
+        if (state.selectionMode !== "wheel") {
+          return;
+        }
+        const { segment: baseSegment, ring } = getCurrentIndices();
+        const harmonyBrightness = state.ringBrightnesses[ring];
 
         for (const group of HARMONY_GROUPS) {
           const line = document.createElement("div");
@@ -830,15 +1252,15 @@
           swatches.className = "harmony-swatches";
 
           for (const offset of group.offsets) {
-            const hue = wrapHue(state.hue + offset / 360);
-            const segment = segmentForHue(hue);
-            const segmentHue = segment / SEGMENTS;
-            const paletteRgb = paletteRgbFor(segmentHue, ring);
+            const segmentOffset = Math.round((offset / 360) * HUE_SEGMENTS);
+            const segment = (baseSegment + segmentOffset + SEGMENTS) % SEGMENTS;
+            const segmentHue = hueForSegment(segment);
+            const paletteRgb = paletteRgbForSegment(segment, ring);
             const rgb = paletteRgb || hsbToRgb(segmentHue, SATURATION, harmonyBrightness);
             const hex = rgbToHex(rgb);
             state.harmonyPoints.push({ segment, ring, hex });
             swatches.appendChild(makeChip(hex, function () {
-              setSelection(segmentHue, harmonyBrightness, true);
+              setSelectionBySegment(segment, harmonyBrightness, true);
               copyHexValue(hex, false);
             }));
           }
@@ -849,41 +1271,62 @@
         }
       }
 
+      function renderGrayscaleBar() {
+        grayscaleBarEl.textContent = "";
+
+        for (const hex of GRAYSCALE_VALUES) {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "gray-chip";
+          if (state.selectionMode === "grayscale" && state.selectedGrayHex === hex) {
+            chip.classList.add("is-selected");
+          }
+          chip.style.backgroundColor = hex;
+          chip.setAttribute("data-tip", hex);
+          chip.setAttribute("aria-label", `Select grayscale ${hex}`);
+          chip.title = hex;
+          chip.addEventListener("click", function () {
+            setSelectionByGrayHex(hex, true);
+            copyHexValue(hex, false);
+          });
+          grayscaleBarEl.appendChild(chip);
+        }
+      }
+
       function pickFromCanvas(clientX, clientY) {
         const rect = canvas.getBoundingClientRect();
         const x = clientX - rect.left;
         const y = clientY - rect.top;
         const cssRadius = rect.width / 2;
-        const innerRadiusCss = (state.innerRadius / state.radius) * cssRadius;
-        const thicknessCss = (state.wheelThickness / state.radius) * cssRadius;
-        const renderedRings = RENDERED_RINGS;
-        const outerRenderedCss = innerRadiusCss + thicknessCss;
+        const innerRadiusCss = (state.ringRadii[0] / state.radius) * cssRadius;
+        const outerRadiusCss = (state.ringRadii[RINGS] / state.radius) * cssRadius;
         const dx = x - cssRadius;
         const dy = y - cssRadius;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Ignore the two outermost rings by clamping hit-testing to rendered thickness.
-        if (distance > outerRenderedCss || distance < innerRadiusCss) {
+        if (distance > outerRadiusCss - GEOMETRY_EPSILON || distance < innerRadiusCss + GEOMETRY_EPSILON) {
           return null;
         }
 
-        const normalized = (distance - innerRadiusCss) / thicknessCss;
-        if (normalized < 0 || normalized >= 1) {
-          return null;
+        let ring = -1;
+        for (let index = 0; index < RINGS; index += 1) {
+          const ringInnerCss = (state.ringRadii[index] / state.radius) * cssRadius;
+          const ringOuterCss = (state.ringRadii[index + 1] / state.radius) * cssRadius;
+          if (distance >= ringInnerCss - GEOMETRY_EPSILON && distance < ringOuterCss - GEOMETRY_EPSILON) {
+            ring = index;
+            break;
+          }
         }
-        const ring = Math.floor(normalized * renderedRings);
-        if (ring < 0 || ring >= renderedRings) {
-          return null;
-        }
-        const brightness = brightnessForRing(ring);
 
-        let angle = Math.atan2(dy, dx) + Math.PI / 2;
-        if (angle < 0) {
-          angle += Math.PI * 2;
+        if (ring < 0 || ring >= RINGS) {
+          return null;
         }
+        const brightness = state.ringBrightnesses[ring];
+
+        const angle = normalizeAngle(Math.atan2(dy, dx) + Math.PI / 2 + state.segmentMidpointInset);
 
         const segment = clamp(Math.floor(angle / state.segmentStep), 0, SEGMENTS - 1);
-        const hue = segment / SEGMENTS;
+        const hue = hueForSegment(segment);
 
         return { hue, brightness, segment, ring };
       }
@@ -906,7 +1349,7 @@
           return;
         }
 
-        const paletteRgb = paletteRgbFor(picked.hue, picked.ring);
+        const paletteRgb = paletteRgbForSegment(picked.segment, picked.ring);
         const rgb = paletteRgb || hsbToRgb(picked.hue, SATURATION, picked.brightness);
         const hex = rgbToHex(rgb);
         showCanvasTip(hex, event.clientX, event.clientY - 6);
@@ -917,7 +1360,7 @@
         if (!picked) {
           return;
         }
-        setSelection(picked.hue, picked.brightness, true);
+        setSelectionBySegment(picked.segment, picked.brightness, true);
         copyHexValue(selectionHex(), false);
       }
 
@@ -993,7 +1436,11 @@
       function init() {
         getQueryState();
         redrawWheelOnResize();
-        setSelection(state.hue, state.brightness, false);
+        if (state.selectionMode === "grayscale" && state.selectedGrayHex) {
+          setSelectionByGrayHex(state.selectedGrayHex, false);
+        } else {
+          setSelection(state.hue, state.brightness, false);
+        }
 
         canvas.addEventListener("click", handleCanvasClick);
         canvas.addEventListener("mousemove", handleCanvasMove);
