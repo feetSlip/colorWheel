@@ -1,6 +1,6 @@
 # Color Wheel Tool
 
-Color palette converted from Bride M. Whelan's *La Armonía en el Color: Nuevas Tendencias*.
+Color palette from Bride M. Whelan's *Color Harmony 2* (Spanish edition: *La Armonía en el Color: Nuevas Tendencias*).
 
 Live: https://feetSlip.github.io/colorWheel/
 
