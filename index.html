@@ -77,10 +77,10 @@
     header {
       border: 4px solid var(--line);
       background: var(--paper);
-      padding: 18px 24px 16px 112px;
+      padding: 26px 24px 20px 112px;
       display: grid;
       gap: 4px;
-      min-height: 108px;
+      min-height: 124px;
       align-content: center;
       position: relative;
       overflow: hidden;
@@ -113,12 +113,13 @@
 
     h1 {
       margin: 0;
+      width: fit-content;
       font-size: clamp(2rem, 3vw, 3.6rem);
       font-weight: 800;
       line-height: 0.95;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      max-width: 7ch;
+      max-width: calc(100% - 180px);
     }
 
     .subtitle {
@@ -152,11 +153,7 @@
 
     .wheel-section {
       padding: 24px 24px 20px;
-      min-height: 580px;
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      align-items: center;
-      column-gap: clamp(18px, 3vw, 36px);
+      min-height: clamp(520px, 58vw, 720px);
       background: var(--paper);
       height: 100%;
     }
@@ -169,12 +166,7 @@
     }
 
     .wheel-section::before {
-      width: 92px;
-      height: 92px;
-      background: var(--red);
-      border: 4px solid var(--line);
-      top: 18px;
-      left: 18px;
+      content: none;
     }
 
     .wheel-section::after {
@@ -182,20 +174,23 @@
     }
 
     .wheel-wrap {
-      width: min(100%, 590px);
-      aspect-ratio: 1 / 1;
-      position: relative;
-      justify-self: center;
-      grid-column: 2;
+      width: var(--wheel-size, min(100%, 560px));
+      height: var(--wheel-size, min(100%, 560px));
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       z-index: 2;
-      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: transparent;
     }
 
     #wheel {
       width: 100%;
       max-width: 100%;
-      aspect-ratio: 1 / 1;
+      height: 100%;
       display: block;
       cursor: crosshair;
       background: transparent;
@@ -211,8 +206,9 @@
       padding: 8px;
       border: 4px solid var(--line);
       background: var(--yellow);
-      align-self: end;
-      justify-self: start;
+      position: absolute;
+      left: 24px;
+      bottom: 20px;
       z-index: 2;
     }
 
@@ -281,7 +277,7 @@
 
     .stat-row {
       display: grid;
-      grid-template-columns: 112px minmax(0, 1fr);
+      grid-template-columns: 144px minmax(0, 1fr);
       gap: 0;
       align-items: center;
       min-height: 54px;
@@ -298,12 +294,13 @@
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      padding: 0 12px;
+      padding: 0 16px;
       height: 100%;
       display: flex;
       align-items: center;
-      min-width: 112px;
-      max-width: 112px;
+      justify-content: flex-start;
+      min-width: 144px;
+      max-width: 144px;
       border-right: 2px solid var(--line);
       background: var(--yellow);
     }
@@ -500,6 +497,7 @@
       .wheel-section {
         min-height: 0;
         height: auto;
+        min-height: clamp(480px, 64vw, 640px);
       }
 
       .info-panel {
@@ -536,8 +534,10 @@
       }
 
       header {
-        padding: 94px 16px 14px 16px;
+        padding: 118px 16px 82px 16px;
         min-height: 0;
+        gap: 14px;
+        align-content: start;
       }
 
       header::before {
@@ -555,35 +555,40 @@
       }
 
       h1 {
+        position: relative;
+        z-index: 1;
+        margin-top: 10px;
+        margin-right: 44px;
         max-width: none;
         font-size: clamp(1.8rem, 9vw, 2.6rem);
+        line-height: 1;
       }
 
       .subtitle {
+        position: absolute;
         right: 16px;
-        bottom: 12px;
+        bottom: 18px;
+        z-index: 1;
+        margin-top: 0;
         max-width: 26ch;
+        padding-right: 0;
+        text-align: right;
       }
 
       .wheel-section {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto;
-        justify-items: center;
-        padding: 18px 14px 14px;
+        min-height: clamp(420px, 96vw, 560px);
+        padding: 18px 14px 82px;
       }
 
       .wheel-wrap {
-        grid-column: 1;
-        width: min(100%, 540px);
-        padding: 14px;
+        max-width: calc(100% - 28px);
+        max-height: calc(100% - 96px);
       }
 
       .grayscale-bar {
-        grid-row: 2;
-        justify-self: start;
-        margin-left: 0;
-        margin-top: 12px;
-        width: min(100%, 320px);
+        left: 14px;
+        bottom: 14px;
+        width: min(calc(100% - 28px), 320px);
         height: auto;
         grid-template-rows: none;
         grid-template-columns: repeat(10, minmax(0, 1fr));
@@ -603,7 +608,7 @@
       }
 
       .stat-row {
-        grid-template-columns: minmax(92px, auto) minmax(0, 1fr);
+        grid-template-columns: 144px minmax(0, 1fr);
       }
 
       .harmony-line {
@@ -731,6 +736,8 @@
 
       const canvas = document.getElementById("wheel");
       const ctx = canvas.getContext("2d");
+      const wheelSection = document.querySelector(".wheel-section");
+      const wheelWrap = document.querySelector(".wheel-wrap");
 
       const previewEl = document.getElementById("preview");
       const hexValueEl = document.getElementById("hexValue");
@@ -743,6 +750,7 @@
       const downloadBtn = document.getElementById("downloadBtn");
       const canvasTip = document.getElementById("canvasTip");
       const grayscaleBarEl = document.getElementById("grayscaleBar");
+      let resizeFrame = 0;
 
       function clamp(value, min, max) {
         return Math.min(max, Math.max(min, value));
@@ -1042,12 +1050,38 @@
       }
 
       function initCanvasSize() {
-        const rect = canvas.getBoundingClientRect();
-        const cssSize = Math.floor(Math.min(rect.width, rect.height));
+        const sectionRect = wheelSection.getBoundingClientRect();
+        const grayscaleRect = grayscaleBarEl.getBoundingClientRect();
+        const styles = window.getComputedStyle(wheelSection);
+        const paddingLeft = parseFloat(styles.paddingLeft) || 0;
+        const paddingRight = parseFloat(styles.paddingRight) || 0;
+        const paddingTop = parseFloat(styles.paddingTop) || 0;
+        const paddingBottom = parseFloat(styles.paddingBottom) || 0;
+        const compactLayout = window.matchMedia("(max-width: 640px)").matches;
+        const safetyInset = compactLayout ? 20 : 28;
+        const grayscaleGap = compactLayout ? 18 : 28;
+        const availableWidth = sectionRect.width - paddingLeft - paddingRight - safetyInset * 2;
+        const availableHeight = sectionRect.height - paddingTop - paddingBottom - safetyInset * 2;
+        const widthLimitFromGray = compactLayout
+          ? availableWidth
+          : availableWidth - grayscaleRect.width - grayscaleGap;
+        const heightLimitFromGray = compactLayout
+          ? availableHeight - grayscaleRect.height - grayscaleGap
+          : availableHeight;
+        const proportionalCap = compactLayout ? sectionRect.width * 0.8 : sectionRect.width * 0.7;
+        const cssSize = Math.floor(Math.min(
+          availableWidth,
+          availableHeight,
+          widthLimitFromGray,
+          heightLimitFromGray,
+          proportionalCap
+        ));
 
         if (cssSize <= 0) {
           return;
         }
+
+        wheelWrap.style.setProperty("--wheel-size", `${cssSize}px`);
 
         const dpr = window.devicePixelRatio || 1;
         const pixelSize = Math.max(1, Math.floor(cssSize * dpr));
@@ -1429,8 +1463,21 @@
 
       function redrawWheelOnResize() {
         initCanvasSize();
+        if (!state.size) {
+          return;
+        }
         drawWheelBitmap();
         renderSelectionLayer();
+      }
+
+      function scheduleWheelResize() {
+        if (resizeFrame) {
+          window.cancelAnimationFrame(resizeFrame);
+        }
+        resizeFrame = window.requestAnimationFrame(function () {
+          resizeFrame = 0;
+          redrawWheelOnResize();
+        });
       }
 
       function init() {
@@ -1448,7 +1495,14 @@
         canvas.addEventListener("blur", hideCanvasTip);
 
         window.addEventListener("keydown", handleKey);
-        window.addEventListener("resize", redrawWheelOnResize);
+        if (typeof ResizeObserver === "function") {
+          const observer = new ResizeObserver(function () {
+            scheduleWheelResize();
+          });
+          observer.observe(wheelWrap);
+        }
+
+        window.addEventListener("resize", scheduleWheelResize);
         copyBtn.addEventListener("click", copyHex);
         downloadBtn.addEventListener("click", downloadPng);
       }
