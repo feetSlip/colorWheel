@@ -378,7 +378,7 @@
       height: 56px;
       border: 3px solid var(--line);
       cursor: pointer;
-      transition: transform 100ms ease;
+      transition: transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
       position: relative;
       min-height: 56px;
     }
@@ -455,14 +455,15 @@
       padding: 5px 8px;
       pointer-events: none;
       opacity: 0;
-      transform: translate(-50%, -130%);
-      transition: opacity 120ms ease;
+      transform: translate(-46%, -118%);
+      transition: opacity 120ms ease, transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
       z-index: 40;
       border: 2px solid #ffffff;
     }
 
     .canvas-tip.show {
       opacity: 1;
+      transform: translate(-50%, -130%);
     }
 
     #copyBtn {
@@ -720,6 +721,10 @@
         selectionMode: "wheel",
         hasExplicitSelection: false,
         harmonyPoints: [],
+        hoveredPoint: null,
+        hoverDisplayPoint: null,
+        hoverProgress: 0,
+        selectionPulse: 0,
         dpr: window.devicePixelRatio || 1,
         size: 0,
         center: 0,
@@ -731,7 +736,8 @@
         segmentMidpointInset: 0,
         ringRadii: [],
         ringBrightnesses: [],
-        wheelBuffer: document.createElement("canvas")
+        wheelBuffer: document.createElement("canvas"),
+        effectFrame: 0
       };
 
       const canvas = document.getElementById("wheel");
@@ -805,6 +811,10 @@
         };
       }
 
+      function samePoint(a, b) {
+        return Boolean(a && b && a.segment === b.segment && a.ring === b.ring);
+      }
+
       function hsbToRgb(h, s, v) {
         const i = Math.floor(h * 6);
         const f = h * 6 - i;
@@ -876,6 +886,11 @@
 
       function paletteRgbFor(hue, ringIndex) {
         return paletteRgbForSegment(segmentIndexForHue(hue), ringIndex);
+      }
+
+      function segmentRgbFor(segment, ringIndex) {
+        const paletteRgb = paletteRgbForSegment(segment, ringIndex);
+        return paletteRgb || hsbToRgb(hueForSegment(segment), SATURATION, state.ringBrightnesses[ringIndex]);
       }
 
       function rgbToHsl(r, g, b) {
@@ -987,6 +1002,7 @@
         renderGrayscaleBar();
         if (explicit === true) {
           state.hasExplicitSelection = true;
+          triggerSelectionPulse();
         }
         updateCopyButtonState();
         updateUrl();
@@ -1004,6 +1020,7 @@
         renderGrayscaleBar();
         if (explicit === true) {
           state.hasExplicitSelection = true;
+          triggerSelectionPulse();
         }
         updateCopyButtonState();
         updateUrl();
@@ -1173,6 +1190,66 @@
         };
       }
 
+      function segmentLiftOffset(intensity) {
+        const lift = Math.max(2, state.dpr * 2.2) * intensity;
+        return { x: -lift, y: -lift };
+      }
+
+      function traceSegmentPath(centerX, centerY, inner, outer, start, end) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, outer, start, end);
+        ctx.arc(centerX, centerY, Math.max(0, inner), end, start, true);
+        ctx.closePath();
+      }
+
+      function drawLiftedSegment(segment, ring, intensity) {
+        if (intensity <= 0) {
+          return;
+        }
+
+        const { inner, outer } = getRingGeometry(ring);
+        const start = angleForSegmentStart(segment);
+        const end = start + state.segmentStep;
+        const rgb = segmentRgbFor(segment, ring);
+        const offset = segmentLiftOffset(intensity);
+        const expand = Math.max(1.2, state.dpr * 1.15) * intensity;
+
+        traceSegmentPath(
+          state.center + offset.x,
+          state.center + offset.y,
+          Math.max(0, inner - expand * 0.35),
+          outer + expand,
+          start,
+          end
+        );
+        ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.96 + 0.04 * intensity})`;
+        ctx.fill();
+
+        traceSegmentPath(
+          state.center + offset.x,
+          state.center + offset.y,
+          Math.max(0, inner - expand * 0.2),
+          outer + expand * 0.82,
+          start,
+          end
+        );
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.88)";
+        ctx.lineWidth = Math.max(1.2, state.dpr * (1.25 + intensity * 0.55));
+        ctx.stroke();
+
+        traceSegmentPath(
+          state.center + offset.x,
+          state.center + offset.y,
+          Math.max(0, inner + Math.max(0.6, expand * 0.1)),
+          Math.max(inner + 1, outer - Math.max(0.8, expand * 0.22)),
+          start,
+          end
+        );
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.96)";
+        ctx.lineWidth = Math.max(0.9, state.dpr * (0.85 + intensity * 0.35));
+        ctx.stroke();
+      }
+
       function drawHarmonyMarkers() {
         if (!state.harmonyPoints.length) {
           return;
@@ -1182,7 +1259,10 @@
 
         for (const point of state.harmonyPoints) {
           const pos = pointForSegmentRing(point.segment, point.ring);
-          drawMarker(pos.x, pos.y, base, point.hex);
+          const isHoverMatch = samePoint(point, state.hoverDisplayPoint);
+          const hoverAmount = isHoverMatch ? state.hoverProgress : 0;
+          const offset = segmentLiftOffset(hoverAmount * 0.9);
+          drawMarker(pos.x + offset.x, pos.y + offset.y, base + hoverAmount * state.dpr, point.hex);
         }
       }
 
@@ -1210,30 +1290,35 @@
           return;
         }
         const { segment, ring } = getCurrentIndices();
-        const { inner, outer } = getRingGeometry(ring);
-        const start = angleForSegmentStart(segment);
-        const end = start + state.segmentStep;
-
-        const drawStroke = (color, lineWidth) => {
-          ctx.beginPath();
-          ctx.arc(state.center, state.center, outer, start, end);
-          ctx.arc(state.center, state.center, inner, end, start, true);
-          ctx.closePath();
-          ctx.strokeStyle = color;
-          ctx.lineWidth = lineWidth;
-          ctx.stroke();
-        };
-
-        drawStroke("rgba(0, 0, 0, 0.88)", Math.max(1.5, state.dpr * 1.5));
-        drawStroke("rgba(255, 255, 255, 0.96)", Math.max(1, state.dpr));
+        const selectionIntensity = 1 + state.selectionPulse * 0.45;
+        drawLiftedSegment(segment, ring, selectionIntensity);
 
         const pos = pointForSegmentRing(segment, ring);
-        drawMarker(pos.x, pos.y, Math.max(2.4, state.dpr * 2.5), selectionHex());
+        const offset = segmentLiftOffset(selectionIntensity * 0.95);
+        drawMarker(
+          pos.x + offset.x,
+          pos.y + offset.y,
+          Math.max(2.4, state.dpr * (2.5 + state.selectionPulse * 0.65)),
+          selectionHex()
+        );
+      }
+
+      function drawHoverIndicator() {
+        if (!state.hoverDisplayPoint || state.hoverProgress <= 0.01) {
+          return;
+        }
+
+        if (state.selectionMode === "wheel" && samePoint(state.hoverDisplayPoint, getCurrentIndices())) {
+          return;
+        }
+
+        drawLiftedSegment(state.hoverDisplayPoint.segment, state.hoverDisplayPoint.ring, state.hoverProgress * 0.92);
       }
 
       function renderSelectionLayer() {
         ctx.clearRect(0, 0, state.size, state.size);
         ctx.drawImage(state.wheelBuffer, 0, 0);
+        drawHoverIndicator();
         drawHarmonyMarkers();
         drawSelectionIndicator();
       }
@@ -1376,13 +1461,75 @@
         canvasTip.classList.remove("show");
       }
 
+      function scheduleEffectAnimation() {
+        if (state.effectFrame) {
+          return;
+        }
+
+        state.effectFrame = window.requestAnimationFrame(function animateEffects() {
+          state.effectFrame = 0;
+          let shouldContinue = false;
+          const hoverTarget = state.hoveredPoint ? 1 : 0;
+          const hoverDelta = hoverTarget - state.hoverProgress;
+
+          if (Math.abs(hoverDelta) > 0.01) {
+            state.hoverProgress += hoverDelta * 0.24;
+            shouldContinue = true;
+          } else if (state.hoverProgress !== hoverTarget) {
+            state.hoverProgress = hoverTarget;
+          }
+
+          if (!state.hoveredPoint && state.hoverProgress <= 0.01) {
+            state.hoverProgress = 0;
+            state.hoverDisplayPoint = null;
+          }
+
+          if (state.selectionPulse > 0.01) {
+            state.selectionPulse *= 0.74;
+            shouldContinue = true;
+          } else if (state.selectionPulse !== 0) {
+            state.selectionPulse = 0;
+          }
+
+          renderSelectionLayer();
+
+          if (shouldContinue) {
+            scheduleEffectAnimation();
+          }
+        });
+      }
+
+      function setHoverPoint(point) {
+        if (samePoint(point, state.hoveredPoint)) {
+          return;
+        }
+
+        state.hoveredPoint = point ? { segment: point.segment, ring: point.ring } : null;
+
+        if (state.hoveredPoint) {
+          state.hoverDisplayPoint = { segment: state.hoveredPoint.segment, ring: state.hoveredPoint.ring };
+          if (state.hoverProgress > 0.18) {
+            state.hoverProgress = 0.18;
+          }
+        }
+
+        scheduleEffectAnimation();
+      }
+
+      function triggerSelectionPulse() {
+        state.selectionPulse = 1;
+        scheduleEffectAnimation();
+      }
+
       function handleCanvasMove(event) {
         const picked = pickFromCanvas(event.clientX, event.clientY);
         if (!picked) {
+          setHoverPoint(null);
           hideCanvasTip();
           return;
         }
 
+        setHoverPoint(picked);
         const paletteRgb = paletteRgbForSegment(picked.segment, picked.ring);
         const rgb = paletteRgb || hsbToRgb(picked.hue, SATURATION, picked.brightness);
         const hex = rgbToHex(rgb);
@@ -1491,8 +1638,14 @@
 
         canvas.addEventListener("click", handleCanvasClick);
         canvas.addEventListener("mousemove", handleCanvasMove);
-        canvas.addEventListener("mouseleave", hideCanvasTip);
-        canvas.addEventListener("blur", hideCanvasTip);
+        canvas.addEventListener("mouseleave", function () {
+          setHoverPoint(null);
+          hideCanvasTip();
+        });
+        canvas.addEventListener("blur", function () {
+          setHoverPoint(null);
+          hideCanvasTip();
+        });
 
         window.addEventListener("keydown", handleKey);
         if (typeof ResizeObserver === "function") {
