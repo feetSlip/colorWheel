@@ -192,7 +192,7 @@
       max-width: 100%;
       height: 100%;
       display: block;
-      cursor: crosshair;
+      cursor: default;
       background: transparent;
       outline: none;
     }
@@ -1475,6 +1475,10 @@
         canvasTip.classList.remove("show");
       }
 
+      function setCanvasCursor(isInteractive) {
+        canvas.style.cursor = isInteractive ? "crosshair" : "default";
+      }
+
       function scheduleEffectAnimation() {
         if (state.effectFrame) {
           return;
@@ -1538,11 +1542,13 @@
       function handleCanvasMove(event) {
         const picked = pickFromCanvas(event.clientX, event.clientY);
         if (!picked) {
+          setCanvasCursor(false);
           setHoverPoint(null);
           hideCanvasTip();
           return;
         }
 
+        setCanvasCursor(true);
         setHoverPoint(picked);
         const paletteRgb = paletteRgbForSegment(picked.segment, picked.ring);
         const rgb = paletteRgb || hsbToRgb(picked.hue, SATURATION, picked.brightness);
@@ -1653,10 +1659,12 @@
         canvas.addEventListener("click", handleCanvasClick);
         canvas.addEventListener("mousemove", handleCanvasMove);
         canvas.addEventListener("mouseleave", function () {
+          setCanvasCursor(false);
           setHoverPoint(null);
           hideCanvasTip();
         });
         canvas.addEventListener("blur", function () {
+          setCanvasCursor(false);
           setHoverPoint(null);
           hideCanvasTip();
         });
