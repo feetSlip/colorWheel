@@ -188,6 +188,7 @@
     }
 
     #wheel {
+      touch-action: none;
       width: 100%;
       max-width: 100%;
       height: 100%;
@@ -672,7 +673,6 @@
       </section>
     </main>
 
-    <!-- Fine Adjustments section removed -->
 
     <section class="harmony-section" aria-label="Harmony Colors">
       <h2 class="section-title">Harmony</h2>
@@ -684,7 +684,6 @@
 
   <script>
     (function () {
-      const USE_BOOK_PALETTE = true;
       const HUE_SEGMENTS = 12;
       const SEGMENTS = HUE_SEGMENTS;
       const RINGS = 8;
@@ -695,7 +694,7 @@
       const GRAYSCALE_VALUES = [
         "#E6E6E6",
         "#CCCCCC",
-        "#B3B3B3",
+        "#B2B2B2",
         "#A6A6A6",
         "#8C8C8C",
         "#737373",
@@ -711,9 +710,9 @@
       ];
       const BOOK_WHEEL = [
         ["#8C0000", "#BF0000", "#D90000", "#FF0000", "#FF264D", "#FF5980", "#FF8CB2", "#FFCCE6"],
-        ["#8C0E1C", "#BF1326", "#D9162B", "#FF1A33", "#FF4D59", "#FF7380", "#FF99A6", "#FFCCCC"],
-        ["#8C3800", "#BF4D00", "#D95700", "#FF6600", "#FF8033", "#FF9966", "#FFBF99", "#FFD9CC"],
-        ["#8C5400", "#BF7300", "#D98200", "#FF9900", "#FFB333", "#FFBF66", "#FFD999", "#FFE6CC"],
+        ["#8C0E1C", "#BF1326", "#D9162B", "#FF1933", "#FF4D59", "#FF7380", "#FF99A6", "#FFCCCC"],
+        ["#8C3800", "#BF4C00", "#D95700", "#FF6600", "#FF8033", "#FF9966", "#FFBF99", "#FFD9CC"],
+        ["#8C5400", "#BF7300", "#D98200", "#FF9900", "#FFB233", "#FFBF66", "#FFD999", "#FFE6CC"],
         ["#8C8C00", "#BFBF00", "#D9D900", "#FFFF00", "#FFFF33", "#FFFF66", "#FFFF99", "#FFFFBF"],
         ["#388C00", "#4CBF00", "#57D900", "#66FF00", "#80FF33", "#A6FF66", "#BFFF99", "#E0FFCC"],
         ["#008C0E", "#00BF13", "#00D916", "#00FF19", "#33FF40", "#66FF73", "#8CFFA6", "#BFFFCC"],
@@ -768,6 +767,7 @@
       const canvasTip = document.getElementById("canvasTip");
       const grayscaleBarEl = document.getElementById("grayscaleBar");
       let resizeFrame = 0;
+      let isPointerDown = false;
 
       function clamp(value, min, max) {
         return Math.min(max, Math.max(min, value));
@@ -866,6 +866,9 @@
           const r = parseInt(cleaned[0] + cleaned[0], 16);
           const g = parseInt(cleaned[1] + cleaned[1], 16);
           const b = parseInt(cleaned[2] + cleaned[2], 16);
+          if ([r, g, b].some((value) => Number.isNaN(value))) {
+            return null;
+          }
           return { r, g, b };
         }
         if (cleaned.length !== 6) {
@@ -881,9 +884,6 @@
       }
 
       function paletteRgbForSegment(segment, ringIndex) {
-        if (!USE_BOOK_PALETTE) {
-          return null;
-        }
         const ring = clamp(ringIndex, 0, RINGS - 1);
         const row = BOOK_WHEEL[segment];
         if (!row) {
@@ -893,10 +893,6 @@
         const paletteRing = paletteSteps - Math.round((ring / Math.max(1, RINGS - 1)) * paletteSteps);
         const hex = row[paletteRing];
         return hex ? hexToRgb(hex) : null;
-      }
-
-      function paletteRgbFor(hue, ringIndex) {
-        return paletteRgbForSegment(segmentIndexForHue(hue), ringIndex);
       }
 
       function segmentRgbFor(segment, ringIndex) {
@@ -945,8 +941,7 @@
           return hexToRgb(state.selectedGrayHex);
         }
         const ring = getNearestRingForBrightness(state.brightness);
-        const paletteRgb = paletteRgbForSegment(state.selectedSegment, ring);
-        return paletteRgb || hsbToRgb(hueForSegment(state.selectedSegment), SATURATION, state.brightness);
+        return segmentRgbFor(state.selectedSegment, ring);
       }
 
       function selectionHex() {
@@ -956,8 +951,6 @@
       function getQueryState() {
         const params = new URLSearchParams(window.location.search);
         const gray = params.get("gray");
-        const h = Number(params.get("h"));
-        const b = Number(params.get("b"));
 
         if (gray) {
           const normalizedGray = `#${gray.replace("#", "").toUpperCase()}`;
@@ -968,14 +961,20 @@
           }
         }
 
-        if (!Number.isNaN(h)) {
-          state.hue = wrapHue(h / 360);
-          state.selectedSegment = segmentIndexForHue(state.hue);
-          state.selectionMode = "wheel";
+        if (params.has("h")) {
+          const h = Number(params.get("h"));
+          if (!Number.isNaN(h)) {
+            state.hue = wrapHue(h / 360);
+            state.selectedSegment = segmentIndexForHue(state.hue);
+            state.selectionMode = "wheel";
+          }
         }
 
-        if (!Number.isNaN(b)) {
-          state.brightness = clamp(b, 0.1, 1);
+        if (params.has("b")) {
+          const b = Number(params.get("b"));
+          if (!Number.isNaN(b)) {
+            state.brightness = clamp(b, 0.1, 1);
+          }
         }
       }
 
@@ -1001,22 +1000,31 @@
         copyBtn.title = state.hasExplicitSelection ? "Copy selected HEX" : "Select a color first";
       }
 
-      function setSelection(h, b, explicit) {
-        state.selectedSegment = segmentIndexForHue(h);
-        state.hue = hueForSegment(state.selectedSegment);
-        state.brightness = clamp(b, 0.1, 1);
-        state.selectionMode = "wheel";
-        state.selectedGrayHex = "";
+      // Shared tail for every selection change: re-render, then sync
+      // the copy button and the URL. Wheel selections pulse on an
+      // explicit pick; grayscale selections do not.
+      function applySelection(explicit, shouldPulse) {
         renderHarmony();
         renderSelectionLayer();
         renderInfoPanel();
         renderGrayscaleBar();
         if (explicit === true) {
           state.hasExplicitSelection = true;
-          triggerSelectionPulse();
+          if (shouldPulse) {
+            triggerSelectionPulse();
+          }
         }
         updateCopyButtonState();
         updateUrl();
+      }
+
+      function setSelection(h, b, explicit) {
+        state.selectedSegment = segmentIndexForHue(h);
+        state.hue = hueForSegment(state.selectedSegment);
+        state.brightness = clamp(b, 0.1, 1);
+        state.selectionMode = "wheel";
+        state.selectedGrayHex = "";
+        applySelection(explicit, true);
       }
 
       function setSelectionBySegment(segment, b, explicit) {
@@ -1025,16 +1033,7 @@
         state.brightness = clamp(b, 0.1, 1);
         state.selectionMode = "wheel";
         state.selectedGrayHex = "";
-        renderHarmony();
-        renderSelectionLayer();
-        renderInfoPanel();
-        renderGrayscaleBar();
-        if (explicit === true) {
-          state.hasExplicitSelection = true;
-          triggerSelectionPulse();
-        }
-        updateCopyButtonState();
-        updateUrl();
+        applySelection(explicit, true);
       }
 
       function setSelectionByGrayHex(hex, explicit) {
@@ -1044,16 +1043,7 @@
         }
         state.selectionMode = "grayscale";
         state.selectedGrayHex = hex;
-        state.harmonyPoints = [];
-        renderHarmony();
-        renderSelectionLayer();
-        renderInfoPanel();
-        renderGrayscaleBar();
-        if (explicit === true) {
-          state.hasExplicitSelection = true;
-        }
-        updateCopyButtonState();
-        updateUrl();
+        applySelection(explicit, false);
       }
 
       async function copyHexValue(hex, feedback) {
@@ -1150,14 +1140,11 @@
 
         for (let ring = 0; ring < RINGS; ring += 1) {
           const { inner, outer } = getRingGeometry(ring);
-          const brightness = state.ringBrightnesses[ring];
 
           for (let segment = 0; segment < SEGMENTS; segment += 1) {
             const start = angleForSegmentStart(segment);
             const end = start + state.segmentStep;
-            const hue = hueForSegment(segment);
-            const paletteRgb = paletteRgbForSegment(segment, ring);
-            const rgb = paletteRgb || hsbToRgb(hue, SATURATION, brightness);
+            const rgb = segmentRgbFor(segment, ring);
 
             bctx.beginPath();
             bctx.arc(center, center, outer, start, end);
@@ -1372,7 +1359,6 @@
           return;
         }
         const { segment: baseSegment, ring } = getCurrentIndices();
-        const harmonyBrightness = state.ringBrightnesses[ring];
 
         for (const group of HARMONY_GROUPS) {
           const line = document.createElement("div");
@@ -1388,9 +1374,7 @@
           for (const offset of group.offsets) {
             const segmentOffset = Math.round((offset / 360) * HUE_SEGMENTS);
             const segment = (baseSegment + segmentOffset + SEGMENTS) % SEGMENTS;
-            const segmentHue = hueForSegment(segment);
-            const paletteRgb = paletteRgbForSegment(segment, ring);
-            const rgb = paletteRgb || hsbToRgb(segmentHue, SATURATION, harmonyBrightness);
+            const rgb = segmentRgbFor(segment, ring);
             const hex = rgbToHex(rgb);
             state.harmonyPoints.push({ segment, ring, hex });
             swatches.appendChild(makeHarmonyChip(hex, function () {
@@ -1420,7 +1404,6 @@
           chip.title = hex;
           chip.addEventListener("click", function () {
             setSelectionByGrayHex(hex, true);
-            copyHexValue(hex, false);
           });
           grayscaleBarEl.appendChild(chip);
         }
@@ -1539,7 +1522,7 @@
         scheduleEffectAnimation();
       }
 
-      function handleCanvasMove(event) {
+      function handleCanvasPointerMove(event) {
         const picked = pickFromCanvas(event.clientX, event.clientY);
         if (!picked) {
           setCanvasCursor(false);
@@ -1550,19 +1533,33 @@
 
         setCanvasCursor(true);
         setHoverPoint(picked);
-        const paletteRgb = paletteRgbForSegment(picked.segment, picked.ring);
-        const rgb = paletteRgb || hsbToRgb(picked.hue, SATURATION, picked.brightness);
+        const rgb = segmentRgbFor(picked.segment, picked.ring);
         const hex = rgbToHex(rgb);
         showCanvasTip(hex, event.clientX, event.clientY - 6);
+
+        if (isPointerDown) {
+          setSelectionBySegment(picked.segment, picked.brightness, true);
+        }
       }
 
-      function handleCanvasClick(event) {
+      function handleCanvasPointerDown(event) {
         const picked = pickFromCanvas(event.clientX, event.clientY);
         if (!picked) {
           return;
         }
+        isPointerDown = true;
         setSelectionBySegment(picked.segment, picked.brightness, true);
-        copyHexValue(selectionHex(), false);
+      }
+
+      function handleCanvasPointerEnd() {
+        isPointerDown = false;
+      }
+
+      function clearCanvasHover() {
+        isPointerDown = false;
+        setCanvasCursor(false);
+        setHoverPoint(null);
+        hideCanvasTip();
       }
 
       async function copyHex() {
@@ -1603,29 +1600,36 @@
           return;
         }
 
-        let nextHue = state.hue;
-        const stepSmall = 1 / 360;
-        const stepLarge = 5 / 360;
+        // Left/Right move one hue segment; Up/Down move one
+        // brightness ring (ring 0 is the brightest).
+        const { segment, ring } = getCurrentIndices();
+        let nextSegment = segment;
+        let nextRing = ring;
 
         switch (event.key) {
           case "ArrowLeft":
-            nextHue = state.hue - stepSmall;
+            nextSegment = (segment - 1 + SEGMENTS) % SEGMENTS;
             break;
           case "ArrowRight":
-            nextHue = state.hue + stepSmall;
+            nextSegment = (segment + 1) % SEGMENTS;
             break;
           case "ArrowUp":
-            nextHue = state.hue + stepLarge;
+            nextRing = clamp(ring - 1, 0, RINGS - 1);
             break;
           case "ArrowDown":
-            nextHue = state.hue - stepLarge;
+            nextRing = clamp(ring + 1, 0, RINGS - 1);
             break;
           default:
             return;
         }
 
         event.preventDefault();
-        setSelection(nextHue, state.brightness, false);
+        const nextBrightness = state.ringBrightnesses[nextRing];
+        setSelectionBySegment(
+          nextSegment,
+          typeof nextBrightness === "number" ? nextBrightness : state.brightness,
+          false
+        );
       }
 
       function redrawWheelOnResize() {
@@ -1656,18 +1660,12 @@
           setSelection(state.hue, state.brightness, false);
         }
 
-        canvas.addEventListener("click", handleCanvasClick);
-        canvas.addEventListener("mousemove", handleCanvasMove);
-        canvas.addEventListener("mouseleave", function () {
-          setCanvasCursor(false);
-          setHoverPoint(null);
-          hideCanvasTip();
-        });
-        canvas.addEventListener("blur", function () {
-          setCanvasCursor(false);
-          setHoverPoint(null);
-          hideCanvasTip();
-        });
+        canvas.addEventListener("pointerdown", handleCanvasPointerDown);
+        canvas.addEventListener("pointermove", handleCanvasPointerMove);
+        canvas.addEventListener("pointerup", handleCanvasPointerEnd);
+        canvas.addEventListener("pointercancel", handleCanvasPointerEnd);
+        canvas.addEventListener("pointerleave", clearCanvasHover);
+        canvas.addEventListener("blur", clearCanvasHover);
 
         window.addEventListener("keydown", handleKey);
         if (typeof ResizeObserver === "function") {

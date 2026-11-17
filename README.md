@@ -2,7 +2,7 @@
 
 Color palette from Bride M. Whelan's *Color Harmony 2* (Spanish edition: *La Armonía en el Color: Nuevas Tendencias*).
 
-Live: https://feetSlip.github.io/colorWheel/
+Live: https://write.loc.cc/
 
 ---
 
