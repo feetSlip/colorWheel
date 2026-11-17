@@ -1107,7 +1107,12 @@
         state.dpr = dpr;
         state.size = pixelSize;
         state.center = pixelSize / 2;
-        state.radius = pixelSize / 2;
+        // Leave headroom inside the canvas for the lifted-segment
+        // effect (offset + expanded radius + strokes). With the wheel
+        // radius equal to half the canvas, lifted segments at the top
+        // and left were clipped flat by the canvas boundary.
+        const liftPad = Math.ceil(Math.max(12 * dpr, pixelSize * 0.03));
+        state.radius = pixelSize / 2 - liftPad;
         state.innerRadius = snapRadius(state.radius * 0.3);
         state.wheelThickness = snapRadius(state.radius - state.innerRadius);
         state.ringWidth = state.wheelThickness / RINGS;
@@ -1413,11 +1418,12 @@
         const rect = canvas.getBoundingClientRect();
         const x = clientX - rect.left;
         const y = clientY - rect.top;
-        const cssRadius = rect.width / 2;
-        const innerRadiusCss = (state.ringRadii[0] / state.radius) * cssRadius;
-        const outerRadiusCss = (state.ringRadii[RINGS] / state.radius) * cssRadius;
-        const dx = x - cssRadius;
-        const dy = y - cssRadius;
+        const cssCenter = rect.width / 2;
+        const deviceToCss = rect.width / canvas.width;
+        const innerRadiusCss = state.ringRadii[0] * deviceToCss;
+        const outerRadiusCss = state.ringRadii[RINGS] * deviceToCss;
+        const dx = x - cssCenter;
+        const dy = y - cssCenter;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance > outerRadiusCss - GEOMETRY_EPSILON || distance < innerRadiusCss + GEOMETRY_EPSILON) {
@@ -1426,8 +1432,8 @@
 
         let ring = -1;
         for (let index = 0; index < RINGS; index += 1) {
-          const ringInnerCss = (state.ringRadii[index] / state.radius) * cssRadius;
-          const ringOuterCss = (state.ringRadii[index + 1] / state.radius) * cssRadius;
+          const ringInnerCss = state.ringRadii[index] * deviceToCss;
+          const ringOuterCss = state.ringRadii[index + 1] * deviceToCss;
           if (distance >= ringInnerCss - GEOMETRY_EPSILON && distance < ringOuterCss - GEOMETRY_EPSILON) {
             ring = index;
             break;
