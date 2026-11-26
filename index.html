@@ -1006,7 +1006,7 @@
 
           <form id="hexForm" class="hex-lookup" autocomplete="off">
             <label for="hexInput" class="sr-only">Enter HEX color to find nearest wheel swatch</label>
-            <input id="hexInput" type="text" maxlength="16" placeholder="#FF0000" spellcheck="false">
+            <input id="hexInput" type="text" maxlength="16" placeholder="#FF0000" spellcheck="false" autocorrect="off" autocapitalize="characters" enterkeyhint="go">
             <button type="submit">Match</button>
           </form>
 
@@ -1843,9 +1843,8 @@
           ? `GRAY · ${String(state.grayIndex + 1).padStart(2, "0")}/10`
           : `H${String(state.segment + 1).padStart(2, "0")} · R${String(state.ring + 1).padStart(2, "0")}`;
 
-        if (document.activeElement !== hexInput) {
-          hexInput.value = hex;
-        }
+        hexInput.value = hex;
+        hexInput.placeholder = hex;
 
         hexValueEl.textContent = hex;
         rgbValueEl.textContent = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
@@ -1971,6 +1970,7 @@
         const nextSeg = mod(segment, SEGMENTS);
         const nextRing = clamp(ring, 0, RINGS - 1);
         if (state.mode === "wheel" && state.segment === nextSeg && state.ring === nextRing) {
+          hexInput.value = currentHex();
           return;
         }
         state.mode = "wheel";
@@ -1981,7 +1981,10 @@
 
       function selectGrayscale(index, syncUrl = true) {
         const nextIdx = clamp(index, 0, GRAYSCALE_VALUES.length - 1);
-        if (state.mode === "grayscale" && state.grayIndex === nextIdx) return;
+        if (state.mode === "grayscale" && state.grayIndex === nextIdx) {
+          hexInput.value = currentHex();
+          return;
+        }
         state.mode = "grayscale";
         state.grayIndex = nextIdx;
         applySelection(false, syncUrl);
@@ -2020,6 +2023,7 @@
           selectWheelCell(best.segment, best.ring, true);
         }
         hexInput.value = currentHex();
+        hexInput.blur();
         showToast(`Matched ${currentHex()}`, currentHex());
       }
 
@@ -2248,35 +2252,15 @@
         copyBtn.addEventListener("click", () => copyText(currentHex(), currentHex(), true));
         downloadBtn.addEventListener("click", downloadPng);
 
-        let pendingHexSubmit = false;
-        const hexSubmitBtn = hexForm.querySelector('button[type="submit"]');
-        if (hexSubmitBtn) {
-          hexSubmitBtn.addEventListener("pointerdown", () => {
-            pendingHexSubmit = true;
-          });
-          const clearPendingHexSubmit = () => {
-            if (!pendingHexSubmit) return;
-            window.setTimeout(() => {
-              if (!pendingHexSubmit) return;
-              pendingHexSubmit = false;
-              if (!hexForm.contains(document.activeElement)) {
-                hexInput.value = currentHex();
-              }
-            }, 0);
-          };
-          window.addEventListener("pointerup", clearPendingHexSubmit);
-          window.addEventListener("pointercancel", clearPendingHexSubmit);
-        }
-
         hexForm.addEventListener("submit", (event) => {
           event.preventDefault();
-          pendingHexSubmit = false;
           matchNearestColor(hexInput.value);
         });
-        hexForm.addEventListener("focusout", (event) => {
-          if (pendingHexSubmit) return;
-          if (event.relatedTarget && hexForm.contains(event.relatedTarget)) return;
-          hexInput.value = currentHex();
+        hexInput.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            hexInput.value = currentHex();
+            hexInput.blur();
+          }
         });
 
         document.querySelectorAll(".stat-row[data-copy-target]").forEach((row) => {
