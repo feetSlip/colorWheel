@@ -3,625 +3,916 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Color Wheel Tool</title>
+  <title>BAUHAUS — Color Wheel Instrument</title>
   <style>
     :root {
-      --bg: #f2f2ec;
-      --paper: #f7f4eb;
-      --panel: #ffffff;
-      --line: #111111;
-      --text: #111111;
-      --muted: #4a4a4a;
-      --red: #d7261e;
-      --blue: #1155cc;
-      --yellow: #f2c300;
-      --gray-1: #e6e1d7;
-      --gray-2: #c8c2b8;
-      --gray-3: #7f7b74;
-      --focus: #111111;
+      --paper: #f3efe6;
+      --surface: #faf8f2;
+      --white: #ffffff;
+      --ink: #141413;
+      --muted: #5a564e;
+      --rule: #d5cfc1;
+      --red: #d92b24;
+      --blue: #1448b8;
+      --yellow: #f2be1a;
+      --border: 3px;
+      --shadow: 5px 5px 0 var(--ink);
+      --shadow-sm: 3px 3px 0 var(--ink);
+      --font-sans: "Futura", "Avenir Next", "Montserrat", "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "SF Mono", "JetBrains Mono", "Roboto Mono", "Menlo", monospace;
     }
 
-    * {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
     }
 
+    html,
     body {
       margin: 0;
-      font-family: "Futura", "Montserrat", "Avenir Next", "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      padding: 0;
+    }
+
+    body {
       min-height: 100vh;
-      padding: 24px;
-      position: relative;
-      overflow-x: hidden;
-      letter-spacing: 0.01em;
+      font-family: var(--font-sans);
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(to right, rgba(20, 20, 19, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(20, 20, 19, 0.035) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: var(--ink);
+      padding: clamp(14px, 2.5vw, 28px);
+      -webkit-font-smoothing: antialiased;
     }
 
-    body::before,
-    body::after {
-      content: "";
-      position: fixed;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    body::before {
-      width: min(26vw, 320px);
-      height: min(26vw, 320px);
-      border: 8px solid var(--line);
-      background: var(--yellow);
-      top: -72px;
-      right: -96px;
-    }
-
-    body::after {
-      width: 0;
-      height: 0;
-      border-left: 0 solid transparent;
-      border-right: 160px solid transparent;
-      border-bottom: 240px solid var(--red);
-      left: -18px;
-      bottom: 36px;
-      transform: rotate(-12deg);
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .app {
-      max-width: 1240px;
+      max-width: 1220px;
       margin: 0 auto;
       display: grid;
-      gap: 18px;
-      position: relative;
-      z-index: 1;
+      gap: 20px;
     }
 
-    header {
-      border: 4px solid var(--line);
-      background: var(--paper);
-      padding: 26px 24px 20px 112px;
+    /* ── Masthead ──────────────────────────────────────────────── */
+    .masthead {
       display: grid;
-      gap: 4px;
-      min-height: 124px;
-      align-content: center;
-      position: relative;
-      overflow: hidden;
+      grid-template-columns: auto 1fr auto;
+      align-items: stretch;
+      border: var(--border) solid var(--ink);
+      background: var(--surface);
+      box-shadow: var(--shadow);
     }
 
-    header::before,
-    header::after {
-      content: "";
-      position: absolute;
-      pointer-events: none;
+    .bauhaus-mark {
+      display: grid;
+      grid-template-columns: repeat(3, 28px);
+      align-items: center;
+      gap: 10px;
+      padding: 16px 20px;
+      background: var(--ink);
+      border-right: var(--border) solid var(--ink);
     }
 
-    header::before {
-      width: 108px;
-      height: 108px;
-      border: 4px solid var(--line);
-      background: var(--blue);
-      left: -24px;
-      top: 10px;
-      transform: rotate(45deg);
+    .shape-tri {
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-bottom: 24px solid var(--yellow);
     }
 
-    header::after {
-      width: 34px;
-      height: 34px;
+    .shape-sq {
+      width: 24px;
+      height: 24px;
       background: var(--red);
-      right: 26px;
-      top: 18px;
+      margin: 0 auto;
+    }
+
+    .shape-cir {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--blue);
+      margin: 0 auto;
+    }
+
+    .masthead-title {
+      padding: 16px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      min-width: 0;
     }
 
     h1 {
       margin: 0;
-      width: fit-content;
-      font-size: clamp(2rem, 3vw, 3.6rem);
+      font-size: clamp(1.55rem, 2.6vw, 2.35rem);
       font-weight: 800;
-      line-height: 0.95;
+      line-height: 1;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      max-width: calc(100% - 180px);
     }
 
     .subtitle {
       margin: 0;
-      color: var(--muted);
-      font-size: 0.9rem;
-      max-width: 34ch;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      line-height: 1.35;
-      position: absolute;
-      right: 24px;
-      bottom: 14px;
-      text-align: right;
+      color: var(--muted);
     }
 
+    .masthead-meta {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      border-left: var(--border) solid var(--ink);
+      min-width: 156px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .meta-cell {
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .meta-cell:first-child {
+      background: var(--yellow);
+      border-bottom: var(--border) solid var(--ink);
+    }
+
+    .meta-cell:last-child {
+      background: var(--white);
+      color: var(--muted);
+    }
+
+    /* ── Main Workspace ────────────────────────────────────────── */
     main {
       display: grid;
-      grid-template-columns: minmax(360px, 1.45fr) minmax(280px, 0.78fr);
-      gap: 18px;
+      grid-template-columns: minmax(0, 1.38fr) minmax(320px, 0.82fr);
+      gap: 20px;
       align-items: stretch;
     }
 
-    .wheel-section,
-    .info-panel,
-    .harmony-section {
-      border: 4px solid var(--line);
-      background: var(--panel);
-      position: relative;
-      overflow: hidden;
+    .card {
+      border: var(--border) solid var(--ink);
+      background: var(--surface);
+      box-shadow: var(--shadow);
     }
 
-    .wheel-section {
-      padding: 24px 24px 20px;
-      min-height: clamp(520px, 58vw, 720px);
-      background: var(--paper);
-      height: 100%;
-    }
-
-    .wheel-section::before,
-    .wheel-section::after {
-      content: "";
-      position: absolute;
-      pointer-events: none;
-    }
-
-    .wheel-section::before {
-      content: none;
-    }
-
-    .wheel-section::after {
-      content: none;
-    }
-
-    .wheel-wrap {
-      width: var(--wheel-size, min(100%, 560px));
-      height: var(--wheel-size, min(100%, 560px));
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
+    .card-header {
       display: flex;
       align-items: center;
-      justify-content: center;
-      background: transparent;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: var(--border) solid var(--ink);
+      background: var(--white);
     }
 
-    #wheel {
-      touch-action: none;
-      width: 100%;
-      max-width: 100%;
-      height: 100%;
-      display: block;
-      cursor: default;
-      background: transparent;
-      outline: none;
+    .card-title {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .plate-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      height: 22px;
+      padding: 0 5px;
+      background: var(--ink);
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+    }
+
+    .card-hint {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Plate 01: Wheel & Grayscale Stage ─────────────────────── */
+    .wheel-section {
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .wheel-body {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: stretch;
+      min-height: clamp(460px, 50vw, 600px);
+    }
+
+    .grayscale-rail {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px 22px 20px 18px;
+      border-right: 1px solid var(--rule);
+      background: var(--surface);
+    }
+
+    .rail-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      user-select: none;
     }
 
     .grayscale-bar {
-      width: clamp(28px, 5vw, 40px);
-      height: clamp(220px, 34vw, 290px);
+      position: relative;
+      width: 20px;
+      height: 300px;
       display: grid;
       grid-template-rows: repeat(10, minmax(0, 1fr));
-      gap: 6px;
-      padding: 8px;
-      border: 4px solid var(--line);
-      background: var(--yellow);
+      gap: 2px;
+      padding: 0;
+      border: 0;
+      background: var(--surface);
+    }
+
+    .grayscale-bar::after {
+      content: "";
       position: absolute;
-      left: 24px;
-      bottom: 20px;
-      z-index: 2;
+      top: 0;
+      bottom: 0;
+      left: calc(100% + 5px);
+      width: 1px;
+      background: rgba(20, 20, 19, 0.22);
+      pointer-events: none;
     }
 
     .gray-chip {
       width: 100%;
       height: 100%;
+      min-width: 0;
       min-height: 0;
-      border: 2px solid var(--line);
       padding: 0;
-      position: relative;
+      border: 0;
+      box-shadow: inset 0 0 0 0.5px rgba(20, 20, 19, 0.08);
       appearance: none;
+      cursor: pointer;
+      position: relative;
+      transition: box-shadow 90ms ease;
+    }
+
+    .gray-chip::before {
+      content: "";
+      position: absolute;
+      left: calc(100% + 5px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 1px;
+      background: rgba(20, 20, 19, 0.35);
+      pointer-events: none;
+    }
+
+    .gray-chip:first-child::before,
+    .gray-chip:last-child::before {
+      width: 7px;
+      background: rgba(20, 20, 19, 0.78);
+    }
+
+    .gray-chip:hover {
+      box-shadow: 0 0 0 1px var(--ink), inset 0 0 0 0.5px var(--ink);
+      z-index: 2;
     }
 
     .gray-chip.is-selected {
-      outline: 4px solid var(--red);
-      outline-offset: 2px;
+      box-shadow: 0 0 0 1.5px var(--ink), inset 0 0 0 1px rgba(255, 255, 255, 0.85);
+      z-index: 3;
+    }
+
+    .gray-chip.is-selected::before {
+      left: calc(100% + 3px);
+      width: 0;
+      height: 0;
+      background: transparent;
+      border-top: 4.5px solid transparent;
+      border-bottom: 4.5px solid transparent;
+      border-right: 7px solid var(--red);
     }
 
     .gray-chip[data-tip]:hover::after,
     .gray-chip[data-tip]:focus-visible::after {
       content: attr(data-tip);
       position: absolute;
-      left: calc(100% + 8px);
+      left: calc(100% + 16px);
       top: 50%;
       transform: translateY(-50%);
-      background: var(--line);
-      color: #ffffff;
-      font-size: 0.75rem;
-      font-family: "SF Mono", "Roboto Mono", "Menlo", monospace;
-      padding: 5px 7px;
+      padding: 4px 7px;
+      background: var(--ink);
+      color: var(--white);
+      border: 2px solid var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
       white-space: nowrap;
-      z-index: 20;
       pointer-events: none;
-      border: 2px solid #ffffff;
+      z-index: 30;
     }
 
-    .info-panel {
-      padding: 18px;
-      display: grid;
-      grid-template-rows: auto auto 1fr;
-      gap: 18px;
-      align-content: start;
-      background: var(--panel);
-      height: 100%;
+    .wheel-stage {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      min-width: 0;
+      min-height: 0;
     }
 
-    .preview {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      border: 4px solid var(--line);
-      background: #ff0000;
+    .wheel-wrap {
+      width: var(--wheel-size, 420px);
+      height: var(--wheel-size, 420px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
     }
 
-    .preview::after {
-      content: none;
+    #wheel {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      cursor: default;
+      border-radius: 50%;
+    }
+
+    #wheel:focus {
+      outline: none;
+    }
+
+    #wheel.is-keyboard-focus {
+      outline: 4px solid var(--blue);
+      outline-offset: 4px;
+    }
+
+    /* ── Plate 02: Color Specimen & Inspector ──────────────────── */
+    .info-panel {
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .info-body {
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .preview {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border: var(--border) solid var(--ink);
+      background: #ff0000;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px 14px;
+      transition: background-color 120ms ease;
+    }
+
+    .preview-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .preview-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: 2px solid currentColor;
+    }
+
+    .preview-hex-big {
+      font-family: var(--font-mono);
+      font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      line-height: 1;
+    }
+
+    .hex-lookup {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      border: var(--border) solid var(--ink);
+      background: var(--white);
+    }
+
+    .hex-lookup input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      background: transparent;
+      outline: none;
+    }
+
+    .hex-lookup input:focus {
+      background: #fffdf5;
+    }
+
+    .hex-lookup button {
+      border: 0;
+      border-left: var(--border) solid var(--ink);
+      min-height: 40px;
+      padding: 0 14px;
+      background: var(--yellow);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: none;
+      transition: background-color 100ms ease, color 100ms ease;
+    }
+
+    .hex-lookup button:hover {
+      background: var(--ink);
+      color: var(--white);
+      transform: none;
     }
 
     .stats {
+      border: var(--border) solid var(--ink);
+      background: var(--white);
       display: grid;
-      gap: 0;
-      font-size: 0.95rem;
-      border: 4px solid var(--line);
-      background: var(--paper);
     }
 
     .stat-row {
       display: grid;
-      grid-template-columns: 144px minmax(0, 1fr);
-      gap: 0;
-      align-items: center;
-      min-height: 54px;
-      border-top: 2px solid var(--line);
+      grid-template-columns: 104px minmax(0, 1fr) auto;
+      align-items: stretch;
+      border-top: 2px solid var(--ink);
+      background: transparent;
+      padding: 0;
+      text-align: left;
+      width: 100%;
+      min-height: 42px;
+      cursor: pointer;
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 600;
+      letter-spacing: normal;
+      text-transform: none;
+      border-left: 0;
+      border-right: 0;
+      border-bottom: 0;
+      box-shadow: none;
+      transition: background-color 100ms ease;
     }
 
     .stat-row:first-child {
       border-top: 0;
     }
 
-    .label {
-      color: var(--line);
-      font-size: 0.84rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0 16px;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      min-width: 144px;
-      max-width: 144px;
-      border-right: 2px solid var(--line);
-      background: var(--yellow);
+    .stat-row:hover {
+      background: var(--paper);
+      color: var(--ink);
+      transform: none;
     }
 
-    .value {
-      font-family: "SF Mono", "Roboto Mono", "Menlo", monospace;
-      font-size: 0.92rem;
+    .stat-label {
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      background: var(--paper);
+      border-right: 2px solid var(--ink);
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+
+    .stat-value {
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-variant-numeric: tabular-nums;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      padding: 0 14px;
       min-width: 0;
+    }
+
+    .stat-copy-hint {
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      transition: opacity 100ms ease;
+    }
+
+    .stat-row:hover .stat-copy-hint,
+    .stat-row:focus-visible .stat-copy-hint {
+      opacity: 1;
     }
 
     .actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 12px;
     }
 
-    button {
-      min-height: 46px;
-      border: 3px solid var(--line);
-      background: #ffffff;
-      color: var(--text);
-      font-size: 0.88rem;
+    .actions button {
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
       font-weight: 800;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      min-height: 46px;
+      border: var(--border) solid var(--ink);
+      background: var(--white);
+      color: var(--ink);
       cursor: pointer;
-      transition: background-color 100ms ease, color 100ms ease;
-      box-shadow: none;
+      box-shadow: var(--shadow-sm);
+      transition: transform 90ms ease, box-shadow 90ms ease, background-color 100ms ease, color 100ms ease;
     }
 
-    button:hover {
-      background: var(--line);
-      color: #ffffff;
+    .actions button:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0 var(--ink);
     }
 
-    button:focus-visible,
-    #wheel:focus-visible {
-      outline: 4px solid var(--blue);
+    .actions button:active {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0 var(--ink);
+    }
+
+    button:focus-visible {
+      outline: 3px solid var(--blue);
       outline-offset: 2px;
     }
 
-    button:disabled {
-      background: var(--gray-1);
-      color: var(--gray-3);
-      cursor: not-allowed;
+    #copyBtn {
+      background: var(--red);
+      color: var(--white);
     }
 
-    .section-title {
-      margin: 0;
-      font-size: 1rem;
-      color: var(--line);
-      font-weight: 800;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
+    #copyBtn:hover {
+      background: var(--ink);
+      color: var(--white);
     }
 
-    .harmony-section {
-      padding: 18px;
-      display: grid;
-      gap: 14px;
-      background: var(--paper);
+    #downloadBtn {
+      background: var(--blue);
+      color: var(--white);
     }
 
-    .swatch-row {
-      display: grid;
-      grid-template-columns: repeat(9, minmax(0, 1fr));
-      gap: 8px;
+    #downloadBtn:hover {
+      background: var(--yellow);
+      color: var(--ink);
     }
 
-    .chip {
-      height: 56px;
-      border: 3px solid var(--line);
-      cursor: pointer;
-      transition: transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 90ms ease;
-      position: relative;
-      min-height: 56px;
-    }
-
-    .chip:hover {
-      transform: translate(-3px, -3px);
-    }
-
-    .chip[data-tip]:hover::after,
-    .chip[data-tip]:focus-visible::after {
-      content: attr(data-tip);
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% + 8px);
-      transform: translateX(-50%);
-      background: var(--line);
-      color: #ffffff;
-      font-size: 0.75rem;
-      font-family: "SF Mono", "Roboto Mono", "Menlo", monospace;
-      padding: 5px 7px;
-      white-space: nowrap;
-      z-index: 20;
-      pointer-events: none;
-      border: 2px solid #ffffff;
-    }
-
-    .harmony-grid {
+    /* ── Plate 03: Chromatic Harmonies ─────────────────────────── */
+    .harmony-body {
+      padding: 16px 18px 18px;
       display: grid;
       gap: 12px;
     }
 
     .harmony-line {
       display: grid;
-      grid-template-columns: 134px 1fr;
-      align-items: center;
-      gap: 0;
-      border: 4px solid var(--line);
-      background: #ffffff;
+      grid-template-columns: 170px minmax(0, 1fr);
+      border: var(--border) solid var(--ink);
+      background: var(--white);
     }
 
     .harmony-label {
-      color: var(--line);
-      font-size: 0.8rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 14px 12px;
-      min-height: 100%;
       display: flex;
-      align-items: center;
-      justify-content: flex-start;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      padding: 10px 14px;
       background: var(--yellow);
-      border-right: 4px solid var(--line);
+      border-right: var(--border) solid var(--ink);
+    }
+
+    .harmony-name {
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      line-height: 1.15;
+    }
+
+    .harmony-deg {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      opacity: 0.78;
     }
 
     .harmony-swatches {
       display: grid;
-      gap: 0;
       grid-auto-flow: column;
       grid-auto-columns: minmax(0, 1fr);
-      padding: 0;
     }
 
-    .harmony-swatches .chip + .chip {
-      border-left-width: 0;
-    }
-
-    .harmony-swatches .chip {
+    .harmony-chip {
+      min-height: 60px;
+      padding: 8px 10px;
+      border: 0;
+      border-left: var(--border) solid var(--ink);
+      box-shadow: none;
       cursor: pointer;
-      pointer-events: auto;
-      will-change: transform;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+      gap: 2px;
+      text-align: left;
+      transition: filter 100ms ease;
     }
 
-    .harmony-swatches .chip:active {
-      transform: translate(-1px, -1px);
-      filter: brightness(0.94) saturate(0.94);
+    .harmony-chip:first-child {
+      border-left: 0;
     }
 
+    .harmony-chip:hover {
+      transform: none;
+      box-shadow: inset 0 0 0 3px var(--ink);
+      filter: brightness(1.03);
+    }
+
+    .harmony-chip:active {
+      transform: none;
+      box-shadow: inset 0 0 0 4px var(--ink);
+      filter: brightness(0.95);
+    }
+
+    .harmony-chip-hex {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+
+    .harmony-chip-role {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    /* ── Floating Canvas Tooltip & Toast ───────────────────────── */
     .canvas-tip {
       position: fixed;
-      background: var(--line);
-      color: #ffffff;
-      font-size: 0.75rem;
-      font-family: "SF Mono", "Roboto Mono", "Menlo", monospace;
+      top: 0;
+      left: 0;
       padding: 5px 8px;
+      background: var(--ink);
+      color: var(--white);
+      border: 2px solid var(--white);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
       pointer-events: none;
       opacity: 0;
-      transform: translate(-46%, -118%);
-      transition: opacity 120ms ease, transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      transform: translate(-50%, -135%);
+      transition: opacity 90ms ease;
       z-index: 40;
-      border: 2px solid #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
     }
 
     .canvas-tip.show {
       opacity: 1;
-      transform: translate(-50%, -130%);
     }
 
-    #copyBtn {
-      background: var(--red);
-      color: #ffffff;
+    .canvas-tip-dot {
+      width: 10px;
+      height: 10px;
+      border: 1.5px solid var(--white);
+      flex: none;
     }
 
-    #copyBtn:hover:not(:disabled) {
-      background: #ffffff;
-      color: var(--line);
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      padding: 10px 16px;
+      background: var(--ink);
+      color: var(--white);
+      border: var(--border) solid var(--ink);
+      box-shadow: var(--shadow-sm);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity 140ms ease, transform 160ms ease;
+      z-index: 50;
     }
 
-    #downloadBtn {
-      background: var(--blue);
-      color: #ffffff;
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    #downloadBtn:hover {
-      background: var(--yellow);
-      color: var(--line);
+    .toast-swatch {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--white);
+      flex: none;
     }
 
-    @media (max-width: 900px) {
-      body {
-        padding: 16px;
-      }
-
+    /* ── Responsive Breakpoints ────────────────────────────────── */
+    @media (max-width: 960px) {
       main {
         grid-template-columns: 1fr;
       }
 
-      .wheel-section {
-        min-height: 0;
-        height: auto;
-        min-height: clamp(480px, 64vw, 640px);
-      }
-
-      .info-panel {
-        grid-template-columns: 110px 1fr;
-        grid-template-rows: auto auto;
-        align-items: start;
-        height: auto;
+      .wheel-body {
+        min-height: clamp(400px, 68vw, 540px);
       }
 
       .preview {
-        width: 110px;
-      }
-
-      .actions {
-        grid-column: 1 / -1;
+        aspect-ratio: 21 / 8;
       }
     }
 
-    @media (max-width: 640px) {
-      body {
-        padding: 12px;
+    @media (max-width: 680px) {
+      .masthead {
+        grid-template-columns: 1fr;
       }
 
-      body::before {
-        width: 160px;
-        height: 160px;
-        right: -72px;
-        top: -54px;
+      .bauhaus-mark {
+        grid-template-columns: repeat(3, 24px);
+        justify-content: start;
+        border-right: 0;
+        border-bottom: var(--border) solid var(--ink);
+        padding: 12px 16px;
       }
 
-      body::after {
-        border-right-width: 96px;
-        border-bottom-width: 140px;
+      .masthead-meta {
+        border-left: 0;
+        border-top: var(--border) solid var(--ink);
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: none;
       }
 
-      header {
-        padding: 118px 16px 82px 16px;
+      .meta-cell:first-child {
+        border-bottom: 0;
+        border-right: var(--border) solid var(--ink);
+      }
+
+      .card-header {
+        flex-wrap: wrap;
+      }
+
+      .wheel-body {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(320px, 1fr) auto;
         min-height: 0;
-        gap: 14px;
-        align-content: start;
       }
 
-      header::before {
-        width: 88px;
-        height: 88px;
-        left: 10px;
-        top: -16px;
+      .wheel-stage {
+        order: 1;
+        padding: 16px;
+        min-height: min(86vw, 420px);
       }
 
-      header::after {
-        width: 24px;
-        height: 24px;
-        right: 14px;
-        top: 14px;
-      }
-
-      h1 {
-        position: relative;
-        z-index: 1;
-        margin-top: 10px;
-        margin-right: 44px;
-        max-width: none;
-        font-size: clamp(1.8rem, 9vw, 2.6rem);
-        line-height: 1;
-      }
-
-      .subtitle {
-        position: absolute;
-        right: 16px;
-        bottom: 18px;
-        z-index: 1;
-        margin-top: 0;
-        max-width: 26ch;
-        padding-right: 0;
-        text-align: right;
-      }
-
-      .wheel-section {
-        min-height: clamp(420px, 96vw, 560px);
-        padding: 18px 14px 82px;
-      }
-
-      .wheel-wrap {
-        max-width: calc(100% - 28px);
-        max-height: calc(100% - 96px);
+      .grayscale-rail {
+        order: 2;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        border-right: 0;
+        border-top: 1px solid var(--rule);
+        padding: 14px 16px 22px;
       }
 
       .grayscale-bar {
-        left: 14px;
-        bottom: 14px;
-        width: min(calc(100% - 28px), 320px);
-        height: auto;
-        grid-template-rows: none;
+        flex: 1;
+        max-width: 320px;
+        width: auto;
+        height: 20px;
+        grid-template-rows: minmax(0, 1fr);
         grid-template-columns: repeat(10, minmax(0, 1fr));
       }
 
-      .gray-chip {
-        min-height: 32px;
+      .grayscale-bar::after {
+        top: calc(100% + 5px);
+        bottom: auto;
+        left: 0;
+        right: 0;
+        width: auto;
+        height: 1px;
       }
 
-      .info-panel {
-        grid-template-columns: 1fr;
-        grid-template-rows: none;
+      .gray-chip::before {
+        left: 50%;
+        top: calc(100% + 5px);
+        transform: translateX(-50%);
+        width: 1px;
+        height: 5px;
       }
 
-      .preview {
-        width: 100%;
+      .gray-chip:first-child::before,
+      .gray-chip:last-child::before {
+        width: 1px;
+        height: 7px;
       }
 
-      .stat-row {
-        grid-template-columns: 144px minmax(0, 1fr);
+      .gray-chip.is-selected::before {
+        left: 50%;
+        top: calc(100% + 3px);
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        background: transparent;
+        border-left: 4.5px solid transparent;
+        border-right: 4.5px solid transparent;
+        border-top: 0;
+        border-bottom: 7px solid var(--red);
+      }
+
+      .gray-chip[data-tip]:hover::after,
+      .gray-chip[data-tip]:focus-visible::after {
+        left: 50%;
+        top: auto;
+        bottom: calc(100% + 10px);
+        transform: translateX(-50%);
       }
 
       .harmony-line {
@@ -629,85 +920,175 @@
       }
 
       .harmony-label {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
         border-right: 0;
-        border-bottom: 4px solid var(--line);
+        border-bottom: var(--border) solid var(--ink);
       }
 
-      .chip {
-        height: 48px;
-        min-height: 48px;
+      .stat-row {
+        grid-template-columns: 88px minmax(0, 1fr) auto;
+      }
+
+      .stat-copy-hint {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <header>
-      <h1>Color Wheel Tool</h1>
-      <p class="subtitle">HSB wheel with harmony swatches and export-ready color details.</p>
+    <header class="masthead">
+      <div class="bauhaus-mark" aria-hidden="true">
+        <span class="shape-tri"></span>
+        <span class="shape-sq"></span>
+        <span class="shape-cir"></span>
+      </div>
+      <div class="masthead-title">
+        <h1>Color Wheel</h1>
+        <p class="subtitle">12×8 Chromatic Plate · Harmonies &amp; Specimen Export</p>
+      </div>
+      <div class="masthead-meta" aria-hidden="true">
+        <div class="meta-cell"><span>PLATE</span><span>01–03</span></div>
+        <div class="meta-cell"><span>MODEL</span><span>ITTEN 96</span></div>
+      </div>
     </header>
 
     <main>
-      <section class="wheel-section" aria-label="Color Wheel">
-        <div id="grayscaleBar" class="grayscale-bar" aria-label="Grayscale colors"></div>
-        <div class="wheel-wrap">
-          <canvas id="wheel" tabindex="0" aria-label="Color wheel canvas"></canvas>
+      <section class="card wheel-section" aria-label="Color Wheel">
+        <div class="card-header">
+          <h2 class="card-title"><span class="plate-index">01</span>Chromatic Wheel</h2>
+          <span class="card-hint">Click / Drag · Focus wheel for Arrow keys</span>
+        </div>
+
+        <div class="wheel-body">
+          <div class="grayscale-rail">
+            <span class="rail-label">L90</span>
+            <div id="grayscaleBar" class="grayscale-bar" role="group" aria-label="Achromatic grayscale palette"></div>
+            <span class="rail-label">L00</span>
+          </div>
+          <div id="wheelStage" class="wheel-stage">
+            <div id="wheelWrap" class="wheel-wrap">
+              <canvas
+                id="wheel"
+                tabindex="0"
+                role="application"
+                aria-label="Interactive 12-hue by 8-tone color wheel. Use arrow keys to change hue and tone, Enter to copy HEX."
+              ></canvas>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="info-panel" aria-label="Selected Color Information">
-        <div id="preview" class="preview"></div>
-
-        <div class="stats">
-          <div class="stat-row"><span class="label">HEX</span><span class="value" id="hexValue">#FF0000</span></div>
-          <div class="stat-row"><span class="label">RGB</span><span class="value" id="rgbValue">rgb(255, 0, 0)</span></div>
-          <div class="stat-row"><span class="label">HSL</span><span class="value" id="hslValue">hsl(0, 100%, 50%)</span></div>
-          <div class="stat-row"><span class="label">Hue</span><span class="value" id="hueValue">0deg</span></div>
-          <div class="stat-row"><span class="label">Brightness</span><span class="value" id="brightnessValue">100%</span></div>
+      <section class="card info-panel" aria-label="Selected Color Specimen">
+        <div class="card-header">
+          <h2 class="card-title"><span class="plate-index">02</span>Color Specimen</h2>
+          <span class="card-hint">Click any row to copy</span>
         </div>
 
-        <div class="actions">
-          <button id="copyBtn" type="button">Copy HEX</button>
-          <button id="downloadBtn" type="button">Download PNG</button>
+        <div class="info-body">
+          <div id="preview" class="preview">
+            <div class="preview-top">
+              <span id="previewCoords" class="preview-badge">H01 · R05</span>
+              <span id="previewContrast" class="preview-badge">AA 5.3:1</span>
+            </div>
+            <div id="previewHexBig" class="preview-hex-big">#FF0000</div>
+          </div>
+
+          <form id="hexForm" class="hex-lookup" autocomplete="off">
+            <label for="hexInput" class="sr-only">Enter HEX color to find nearest wheel swatch</label>
+            <input id="hexInput" type="text" maxlength="16" placeholder="#FF0000" spellcheck="false">
+            <button type="submit">Match</button>
+          </form>
+
+          <div class="stats" role="group" aria-label="Color values">
+            <button type="button" class="stat-row" data-copy-target="hexValue">
+              <span class="stat-label">HEX</span>
+              <span class="stat-value" id="hexValue">#FF0000</span>
+              <span class="stat-copy-hint">Copy</span>
+            </button>
+            <button type="button" class="stat-row" data-copy-target="rgbValue">
+              <span class="stat-label">RGB</span>
+              <span class="stat-value" id="rgbValue">255, 0, 0</span>
+              <span class="stat-copy-hint">Copy</span>
+            </button>
+            <button type="button" class="stat-row" data-copy-target="hslValue">
+              <span class="stat-label">HSL</span>
+              <span class="stat-value" id="hslValue">0, 100%, 50%</span>
+              <span class="stat-copy-hint">Copy</span>
+            </button>
+            <button type="button" class="stat-row" data-copy-target="hsbValue">
+              <span class="stat-label">HSB</span>
+              <span class="stat-value" id="hsbValue">0, 100%, 100%</span>
+              <span class="stat-copy-hint">Copy</span>
+            </button>
+            <button type="button" class="stat-row" data-copy-target="toneValue">
+              <span class="stat-label">TONE</span>
+              <span class="stat-value" id="toneValue">Pure Hue (Ring 5/8)</span>
+              <span class="stat-copy-hint">Copy</span>
+            </button>
+          </div>
+
+          <div class="actions">
+            <button id="copyBtn" type="button">Copy HEX</button>
+            <button id="downloadBtn" type="button">Download PNG</button>
+          </div>
         </div>
       </section>
     </main>
 
-
-    <section class="harmony-section" aria-label="Harmony Colors">
-      <h2 class="section-title">Harmony</h2>
-      <div id="harmonyGrid" class="harmony-grid"></div>
+    <section class="card harmony-section" aria-label="Color Harmonies">
+      <div class="card-header">
+        <h2 class="card-title"><span class="plate-index">03</span>Harmonies</h2>
+        <span id="harmonyHint" class="card-hint">Click to copy · Shift+Click to select</span>
+      </div>
+      <div id="harmonyGrid" class="harmony-body"></div>
     </section>
   </div>
 
-  <div id="canvasTip" class="canvas-tip" role="status" aria-live="polite"></div>
+  <div id="canvasTip" class="canvas-tip" aria-hidden="true">
+    <span id="canvasTipDot" class="canvas-tip-dot"></span>
+    <span id="canvasTipText"></span>
+  </div>
+  <div id="toast" class="toast" aria-hidden="true">
+    <span id="toastSwatch" class="toast-swatch"></span>
+    <span id="toastText"></span>
+  </div>
+  <div id="srAnnounce" class="sr-only" role="status" aria-live="polite"></div>
 
   <script>
-    (function () {
-      const HUE_SEGMENTS = 12;
-      const SEGMENTS = HUE_SEGMENTS;
+    (() => {
+      "use strict";
+
+      const SEGMENTS = 12;
       const RINGS = 8;
-      const SATURATION = 1;
+      const DEFAULT_SEGMENT = 0;
+      const DEFAULT_RING = 4; // Pure #FF0000
       const TAU = Math.PI * 2;
       const START_ANGLE = -Math.PI / 2;
-      const GEOMETRY_EPSILON = 1e-6;
+      const SEGMENT_STEP = TAU / SEGMENTS;
+      const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
+
       const GRAYSCALE_VALUES = [
-        "#E6E6E6",
-        "#CCCCCC",
-        "#B2B2B2",
-        "#A6A6A6",
-        "#8C8C8C",
-        "#737373",
-        "#595959",
-        "#404040",
-        "#262626",
-        "#000000"
+        "#E6E6E6", "#CCCCCC", "#B2B2B2", "#A6A6A6", "#8C8C8C",
+        "#737373", "#595959", "#404040", "#262626", "#000000"
       ];
-      const HARMONY_GROUPS = [
-        { name: "Complementary", offsets: [180] },
-        { name: "Triadic", offsets: [120, -120] },
-        { name: "Analogous", offsets: [30, -30] }
+
+      const RING_NAMES = [
+        "Tint 4", "Tint 3", "Tint 2", "Tint 1",
+        "Pure Hue", "Shade 1", "Shade 2", "Shade 3"
       ];
+
+      // 12 chromatic sectors × 8 tones (stored shade -> pure -> tint)
       const BOOK_WHEEL = [
         ["#8C0000", "#BF0000", "#D90000", "#FF0000", "#FF264D", "#FF5980", "#FF8CB2", "#FFCCE6"],
         ["#8C0E1C", "#BF1326", "#D9162B", "#FF1933", "#FF4D59", "#FF7380", "#FF99A6", "#FFCCCC"],
@@ -723,740 +1104,966 @@
         ["#54008C", "#7300BF", "#8200D9", "#9900FF", "#A633FF", "#BF66FF", "#CC99FF", "#E6CCFF"]
       ];
 
+      const HARMONY_GROUPS = [
+        { name: "Complementary", deg: "180°", offsets: [6] },
+        { name: "Triadic", deg: "±120°", offsets: [4, -4] },
+        { name: "Analogous", deg: "±30°", offsets: [-1, 1] }
+      ];
+
+      // ── DOM References ────────────────────────────────────────
+      const canvas = document.getElementById("wheel");
+      const ctx = canvas.getContext("2d");
+      const wheelStage = document.getElementById("wheelStage");
+      const wheelWrap = document.getElementById("wheelWrap");
+      const grayscaleBarEl = document.getElementById("grayscaleBar");
+
+      const previewEl = document.getElementById("preview");
+      const previewCoordsEl = document.getElementById("previewCoords");
+      const previewContrastEl = document.getElementById("previewContrast");
+      const previewHexBigEl = document.getElementById("previewHexBig");
+
+      const hexForm = document.getElementById("hexForm");
+      const hexInput = document.getElementById("hexInput");
+      const hexValueEl = document.getElementById("hexValue");
+      const rgbValueEl = document.getElementById("rgbValue");
+      const hslValueEl = document.getElementById("hslValue");
+      const hsbValueEl = document.getElementById("hsbValue");
+      const toneValueEl = document.getElementById("toneValue");
+
+      const copyBtn = document.getElementById("copyBtn");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const harmonyGridEl = document.getElementById("harmonyGrid");
+      const harmonyHintEl = document.getElementById("harmonyHint");
+
+      const canvasTip = document.getElementById("canvasTip");
+      const canvasTipDot = document.getElementById("canvasTipDot");
+      const canvasTipText = document.getElementById("canvasTipText");
+      const toastEl = document.getElementById("toast");
+      const toastSwatchEl = document.getElementById("toastSwatch");
+      const toastTextEl = document.getElementById("toastText");
+      const srAnnounceEl = document.getElementById("srAnnounce");
+
+      // ── State ─────────────────────────────────────────────────
       const state = {
-        hue: 0,
-        brightness: 1,
-        selectedSegment: 0,
-        selectedGrayHex: "",
-        selectionMode: "wheel",
-        hasExplicitSelection: false,
+        mode: "wheel", // "wheel" | "grayscale"
+        segment: DEFAULT_SEGMENT,
+        ring: DEFAULT_RING,
+        grayIndex: 0,
+
         harmonyPoints: [],
-        hoveredPoint: null,
-        hoverDisplayPoint: null,
+        hovered: null,
+        hoverDisplay: null,
         hoverProgress: 0,
-        selectionPulse: 0,
-        dpr: window.devicePixelRatio || 1,
+        pulse: 0,
+        lastAnimTime: 0,
+        animFrame: 0,
+        resizeFrame: 0,
+        urlTimer: 0,
+        toastTimer: 0,
+        copyBtnTimer: 0,
+        isDragging: false,
+
+        // Canvas geometry (device pixels)
+        dpr: 1,
+        cssSize: 0,
         size: 0,
         center: 0,
         radius: 0,
         innerRadius: 0,
-        wheelThickness: 0,
         ringWidth: 0,
-        segmentStep: TAU / SEGMENTS,
-        segmentMidpointInset: 0,
+        tileGap: 0,
         ringRadii: [],
-        ringBrightnesses: [],
-        wheelBuffer: document.createElement("canvas"),
-        effectFrame: 0
+        wheelBuffer: document.createElement("canvas")
       };
 
-      const canvas = document.getElementById("wheel");
-      const ctx = canvas.getContext("2d");
-      const wheelSection = document.querySelector(".wheel-section");
-      const wheelWrap = document.querySelector(".wheel-wrap");
+      const grayChipEls = [];
+      let lastInputWasKeyboard = false;
 
-      const previewEl = document.getElementById("preview");
-      const hexValueEl = document.getElementById("hexValue");
-      const rgbValueEl = document.getElementById("rgbValue");
-      const hslValueEl = document.getElementById("hslValue");
-      const hueValueEl = document.getElementById("hueValue");
-      const brightnessValueEl = document.getElementById("brightnessValue");
-      const harmonyGridEl = document.getElementById("harmonyGrid");
-      const copyBtn = document.getElementById("copyBtn");
-      const downloadBtn = document.getElementById("downloadBtn");
-      const canvasTip = document.getElementById("canvasTip");
-      const grayscaleBarEl = document.getElementById("grayscaleBar");
-      let resizeFrame = 0;
-      let isPointerDown = false;
-
-      function clamp(value, min, max) {
-        return Math.min(max, Math.max(min, value));
-      }
-
-      function wrapHue(value) {
-        const wrapped = value % 1;
-        return wrapped < 0 ? wrapped + 1 : wrapped;
-      }
-
-      function segmentSupportsHue(segment) {
-        return segment >= 0 && segment < HUE_SEGMENTS;
-      }
-
-      function hueForSegment(segment) {
-        return segmentSupportsHue(segment) ? segment / HUE_SEGMENTS : 0;
-      }
-
-      function segmentIndexForHue(hue) {
-        return Math.round(wrapHue(hue) * HUE_SEGMENTS) % HUE_SEGMENTS;
-      }
-
-      function brightnessForRing(ringIndex) {
-        const linear = 1 - ringIndex / (RINGS - 1);
-        return 0.1 + 0.9 * Math.pow(linear, 0.8);
-      }
-
-      function snapRadius(value) {
-        return Math.round(value * 2) / 2;
-      }
-
-      function normalizeAngle(angle) {
-        const wrapped = angle % TAU;
-        return wrapped < 0 ? wrapped + TAU : wrapped;
-      }
-
-      function angleForSegmentStart(segment) {
-        return START_ANGLE + segment * state.segmentStep;
-      }
-
-      function angleForSegmentMidpoint(segment) {
-        return angleForSegmentStart(segment) + state.segmentStep * 0.5;
-      }
-
-      function getRingGeometry(ring) {
-        const inner = state.ringRadii[ring];
-        const outer = state.ringRadii[ring + 1];
-        return {
-          inner,
-          outer,
-          mid: inner + (outer - inner) * 0.5
-        };
-      }
-
-      function samePoint(a, b) {
-        return Boolean(a && b && a.segment === b.segment && a.ring === b.ring);
-      }
-
-      function hsbToRgb(h, s, v) {
-        const i = Math.floor(h * 6);
-        const f = h * 6 - i;
-        const p = v * (1 - s);
-        const q = v * (1 - f * s);
-        const t = v * (1 - (1 - f) * s);
-        let r = 0;
-        let g = 0;
-        let b = 0;
-
-        switch (i % 6) {
-          case 0: r = v; g = t; b = p; break;
-          case 1: r = q; g = v; b = p; break;
-          case 2: r = p; g = v; b = t; break;
-          case 3: r = p; g = q; b = v; break;
-          case 4: r = t; g = p; b = v; break;
-          default: r = v; g = p; b = q; break;
-        }
-
-        return {
-          r: Math.round(clamp(r, 0, 1) * 255),
-          g: Math.round(clamp(g, 0, 1) * 255),
-          b: Math.round(clamp(b, 0, 1) * 255)
-        };
-      }
-
-      function rgbToHex(rgb) {
-        const toHex = (n) => n.toString(16).padStart(2, "0").toUpperCase();
-        return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
-      }
+      // ── Color Utilities ───────────────────────────────────────
+      const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+      const mod = (n, m) => ((n % m) + m) % m;
 
       function hexToRgb(hex) {
-        if (!hex || typeof hex !== "string") {
-          return null;
-        }
-        const cleaned = hex.replace("#", "").trim();
-        if (cleaned.length === 3) {
-          const r = parseInt(cleaned[0] + cleaned[0], 16);
-          const g = parseInt(cleaned[1] + cleaned[1], 16);
-          const b = parseInt(cleaned[2] + cleaned[2], 16);
-          if ([r, g, b].some((value) => Number.isNaN(value))) {
-            return null;
-          }
-          return { r, g, b };
-        }
-        if (cleaned.length !== 6) {
-          return null;
-        }
-        const r = parseInt(cleaned.slice(0, 2), 16);
-        const g = parseInt(cleaned.slice(2, 4), 16);
-        const b = parseInt(cleaned.slice(4, 6), 16);
-        if ([r, g, b].some((value) => Number.isNaN(value))) {
-          return null;
-        }
-        return { r, g, b };
+        if (typeof hex !== "string") return null;
+        const clean = hex.trim().replace(/^#/, "");
+        if (!/^[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(clean)) return null;
+        const full = clean.length === 3
+          ? clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2]
+          : clean;
+        return {
+          r: parseInt(full.slice(0, 2), 16),
+          g: parseInt(full.slice(2, 4), 16),
+          b: parseInt(full.slice(4, 6), 16)
+        };
       }
 
-      function paletteRgbForSegment(segment, ringIndex) {
-        const ring = clamp(ringIndex, 0, RINGS - 1);
-        const row = BOOK_WHEEL[segment];
-        if (!row) {
-          return null;
-        }
-        const paletteSteps = row.length - 1;
-        const paletteRing = paletteSteps - Math.round((ring / Math.max(1, RINGS - 1)) * paletteSteps);
-        const hex = row[paletteRing];
-        return hex ? hexToRgb(hex) : null;
-      }
-
-      function segmentRgbFor(segment, ringIndex) {
-        const paletteRgb = paletteRgbForSegment(segment, ringIndex);
-        return paletteRgb || hsbToRgb(hueForSegment(segment), SATURATION, state.ringBrightnesses[ringIndex]);
-      }
-
-      function rgbToHsl(r, g, b) {
+      function rgbToHsl({ r, g, b }) {
         const rn = r / 255;
         const gn = g / 255;
         const bn = b / 255;
         const max = Math.max(rn, gn, bn);
         const min = Math.min(rn, gn, bn);
+        const d = max - min;
         const l = (max + min) / 2;
-        const delta = max - min;
 
-        if (delta === 0) {
+        if (d === 0) {
           return { h: 0, s: 0, l: Math.round(l * 100) };
         }
 
-        const s = delta / (1 - Math.abs(2 * l - 1));
-        let h;
+        const s = d / (1 - Math.abs(2 * l - 1));
+        let h = 0;
+        if (max === rn) h = ((gn - bn) / d) % 6;
+        else if (max === gn) h = (bn - rn) / d + 2;
+        else h = (rn - gn) / d + 4;
 
-        switch (max) {
-          case rn:
-            h = ((gn - bn) / delta) % 6;
-            break;
-          case gn:
-            h = (bn - rn) / delta + 2;
-            break;
-          default:
-            h = (rn - gn) / delta + 4;
-            break;
-        }
-
-        const hd = Math.round((h * 60 + 360) % 360);
         return {
-          h: hd,
+          h: Math.round((h * 60 + 360) % 360),
           s: Math.round(s * 100),
           l: Math.round(l * 100)
         };
       }
 
-      function selectionColor() {
-        if (state.selectionMode === "grayscale" && state.selectedGrayHex) {
-          return hexToRgb(state.selectedGrayHex);
+      function rgbToHsb({ r, g, b }) {
+        const rn = r / 255;
+        const gn = g / 255;
+        const bn = b / 255;
+        const max = Math.max(rn, gn, bn);
+        const min = Math.min(rn, gn, bn);
+        const d = max - min;
+        const s = max === 0 ? 0 : d / max;
+
+        let h = 0;
+        if (d !== 0) {
+          if (max === rn) h = ((gn - bn) / d) % 6;
+          else if (max === gn) h = (bn - rn) / d + 2;
+          else h = (rn - gn) / d + 4;
         }
-        const ring = getNearestRingForBrightness(state.brightness);
-        return segmentRgbFor(state.selectedSegment, ring);
+
+        return {
+          h: Math.round((h * 60 + 360) % 360),
+          s: Math.round(s * 100),
+          b: Math.round(max * 100)
+        };
       }
 
-      function selectionHex() {
-        return rgbToHex(selectionColor());
+      function relativeLuminance({ r, g, b }) {
+        const toLinear = (c) => {
+          const s = c / 255;
+          return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+        };
+        return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
       }
 
-      function getQueryState() {
+      function bestInkFor(rgb) {
+        const lum = relativeLuminance(rgb);
+        const darkContrast = (lum + 0.05) / (0.007 + 0.05); // against #141413
+        const lightContrast = (1.0 + 0.05) / (lum + 0.05);  // against #ffffff
+        if (darkContrast >= lightContrast) {
+          return { ink: "#141413", ratio: darkContrast, label: darkContrast >= 7 ? "AAA" : darkContrast >= 4.5 ? "AA" : "LG" };
+        }
+        return { ink: "#FFFFFF", ratio: lightContrast, label: lightContrast >= 7 ? "AAA" : lightContrast >= 4.5 ? "AA" : "LG" };
+      }
+
+      // Ring 0 (inner) -> index 7 (lightest tint); Ring 7 (outer) -> index 0 (darkest shade)
+      function hexForCell(segment, ring) {
+        const row = BOOK_WHEEL[mod(segment, SEGMENTS)];
+        return row[RINGS - 1 - clamp(ring, 0, RINGS - 1)];
+      }
+
+      function currentHex() {
+        return state.mode === "grayscale"
+          ? GRAYSCALE_VALUES[state.grayIndex]
+          : hexForCell(state.segment, state.ring);
+      }
+
+      function currentRgb() {
+        return hexToRgb(currentHex());
+      }
+
+      function sameCell(a, b) {
+        return Boolean(a && b && a.segment === b.segment && a.ring === b.ring);
+      }
+
+      // ── URL Sync (supports ?s=&r=, legacy ?h=&b=, and ?gray=) ─
+      function loadFromUrl() {
         const params = new URLSearchParams(window.location.search);
-        const gray = params.get("gray");
 
+        const gray = params.get("gray");
         if (gray) {
-          const normalizedGray = `#${gray.replace("#", "").toUpperCase()}`;
-          if (GRAYSCALE_VALUES.includes(normalizedGray)) {
-            state.selectedGrayHex = normalizedGray;
-            state.selectionMode = "grayscale";
+          const normalized = `#${gray.replace(/^#/, "").toUpperCase()}`;
+          const idx = GRAYSCALE_VALUES.indexOf(normalized);
+          if (idx !== -1) {
+            state.mode = "grayscale";
+            state.grayIndex = idx;
             return;
           }
         }
 
-        if (params.has("h")) {
+        if (params.has("s") || params.has("r")) {
+          const s = Number(params.get("s"));
+          const r = Number(params.get("r"));
+          if (Number.isFinite(s)) state.segment = mod(Math.round(s), SEGMENTS);
+          if (Number.isFinite(r)) state.ring = clamp(Math.round(r), 0, RINGS - 1);
+          state.mode = "wheel";
+          return;
+        }
+
+        // Legacy ?h=0..360&b=0.1..1 compatibility
+        if (params.has("h") || params.has("b")) {
           const h = Number(params.get("h"));
-          if (!Number.isNaN(h)) {
-            state.hue = wrapHue(h / 360);
-            state.selectedSegment = segmentIndexForHue(state.hue);
-            state.selectionMode = "wheel";
-          }
-        }
-
-        if (params.has("b")) {
           const b = Number(params.get("b"));
-          if (!Number.isNaN(b)) {
-            state.brightness = clamp(b, 0.1, 1);
+          if (Number.isFinite(h)) {
+            state.segment = mod(Math.round((h / 360) * SEGMENTS), SEGMENTS);
           }
+          if (Number.isFinite(b)) {
+            const norm = clamp((b - 0.1) / 0.9, 0, 1);
+            state.ring = clamp(Math.round((1 - Math.pow(norm, 1 / 0.8)) * (RINGS - 1)), 0, RINGS - 1);
+          }
+          state.mode = "wheel";
         }
       }
 
-      function updateUrl() {
-        const params = new URLSearchParams(window.location.search);
-        if (state.selectionMode === "grayscale" && state.selectedGrayHex) {
-          params.set("gray", state.selectedGrayHex.slice(1));
-          params.delete("h");
-          params.delete("b");
+      function scheduleUrlSync() {
+        if (state.urlTimer) window.clearTimeout(state.urlTimer);
+        state.urlTimer = window.setTimeout(() => {
+          state.urlTimer = 0;
+          try {
+            const params = new URLSearchParams(window.location.search);
+            params.delete("h");
+            params.delete("b");
+            if (state.mode === "grayscale") {
+              params.set("gray", currentHex().slice(1));
+              params.delete("s");
+              params.delete("r");
+            } else {
+              params.set("s", String(state.segment));
+              params.set("r", String(state.ring));
+              params.delete("gray");
+            }
+            const next = `${window.location.pathname}?${params.toString()}`;
+            window.history.replaceState(null, "", next);
+          } catch (_err) {
+            // Ignore restricted history API contexts (e.g. sandboxed iframes)
+          }
+        }, 120);
+      }
+
+      // ── Clipboard & Feedback ──────────────────────────────────
+      function showToast(message, swatchHex) {
+        toastTextEl.textContent = message;
+        if (swatchHex) {
+          toastSwatchEl.style.backgroundColor = swatchHex;
+          toastSwatchEl.style.display = "block";
         } else {
-          params.set("h", String(Math.round(state.hue * 360)));
-          params.set("b", state.brightness.toFixed(3));
-          params.delete("gray");
+          toastSwatchEl.style.display = "none";
         }
-        const query = params.toString();
-        const next = `${window.location.pathname}?${query}`;
-        window.history.replaceState(null, "", next);
+        toastEl.classList.add("show");
+        srAnnounceEl.textContent = message;
+
+        if (state.toastTimer) window.clearTimeout(state.toastTimer);
+        state.toastTimer = window.setTimeout(() => {
+          toastEl.classList.remove("show");
+          state.toastTimer = 0;
+        }, 1500);
       }
 
-      function updateCopyButtonState() {
-        copyBtn.disabled = !state.hasExplicitSelection;
-        copyBtn.setAttribute("aria-disabled", String(!state.hasExplicitSelection));
-        copyBtn.title = state.hasExplicitSelection ? "Copy selected HEX" : "Select a color first";
-      }
-
-      // Shared tail for every selection change: re-render, then sync
-      // the copy button and the URL. Wheel selections pulse on an
-      // explicit pick; grayscale selections do not.
-      function applySelection(explicit, shouldPulse) {
-        renderHarmony();
-        renderSelectionLayer();
-        renderInfoPanel();
-        renderGrayscaleBar();
-        if (explicit === true) {
-          state.hasExplicitSelection = true;
-          if (shouldPulse) {
-            triggerSelectionPulse();
-          }
-        }
-        updateCopyButtonState();
-        updateUrl();
-      }
-
-      function setSelection(h, b, explicit) {
-        state.selectedSegment = segmentIndexForHue(h);
-        state.hue = hueForSegment(state.selectedSegment);
-        state.brightness = clamp(b, 0.1, 1);
-        state.selectionMode = "wheel";
-        state.selectedGrayHex = "";
-        applySelection(explicit, true);
-      }
-
-      function setSelectionBySegment(segment, b, explicit) {
-        state.selectedSegment = clamp(segment, 0, SEGMENTS - 1);
-        state.hue = hueForSegment(state.selectedSegment);
-        state.brightness = clamp(b, 0.1, 1);
-        state.selectionMode = "wheel";
-        state.selectedGrayHex = "";
-        applySelection(explicit, true);
-      }
-
-      function setSelectionByGrayHex(hex, explicit) {
-        const rgb = hexToRgb(hex);
-        if (!rgb) {
-          return;
-        }
-        state.selectionMode = "grayscale";
-        state.selectedGrayHex = hex;
-        applySelection(explicit, false);
-      }
-
-      async function copyHexValue(hex, feedback) {
+      async function copyText(text, swatchHex, updateMainBtn = false) {
+        let copied = false;
         try {
-          await navigator.clipboard.writeText(hex);
-          if (feedback) {
-            copyBtn.textContent = "Copied";
-            setTimeout(function () {
-              copyBtn.textContent = "Copy HEX";
-            }, 900);
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            copied = true;
           }
-          return true;
-        } catch (_error) {
-          if (feedback) {
-            copyBtn.textContent = "Unavailable";
-            setTimeout(function () {
-              copyBtn.textContent = "Copy HEX";
-            }, 1200);
-          }
-          return false;
+        } catch (_err) {
+          copied = false;
         }
+
+        if (!copied) {
+          try {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            copied = document.execCommand("copy");
+            document.body.removeChild(ta);
+          } catch (_err) {
+            copied = false;
+          }
+        }
+
+        if (copied) {
+          showToast(`Copied ${text}`, swatchHex);
+          if (updateMainBtn) {
+            copyBtn.textContent = "Copied!";
+            if (state.copyBtnTimer) window.clearTimeout(state.copyBtnTimer);
+            state.copyBtnTimer = window.setTimeout(() => {
+              copyBtn.textContent = "Copy HEX";
+              state.copyBtnTimer = 0;
+            }, 1000);
+          }
+        } else {
+          showToast("Clipboard unavailable", null);
+        }
+        return copied;
       }
 
-      function initCanvasSize() {
-        const sectionRect = wheelSection.getBoundingClientRect();
-        const grayscaleRect = grayscaleBarEl.getBoundingClientRect();
-        const styles = window.getComputedStyle(wheelSection);
-        const paddingLeft = parseFloat(styles.paddingLeft) || 0;
-        const paddingRight = parseFloat(styles.paddingRight) || 0;
-        const paddingTop = parseFloat(styles.paddingTop) || 0;
-        const paddingBottom = parseFloat(styles.paddingBottom) || 0;
-        const compactLayout = window.matchMedia("(max-width: 640px)").matches;
-        const safetyInset = compactLayout ? 20 : 28;
-        const grayscaleGap = compactLayout ? 18 : 28;
-        const availableWidth = sectionRect.width - paddingLeft - paddingRight - safetyInset * 2;
-        const availableHeight = sectionRect.height - paddingTop - paddingBottom - safetyInset * 2;
-        const widthLimitFromGray = compactLayout
-          ? availableWidth
-          : availableWidth - grayscaleRect.width - grayscaleGap;
-        const heightLimitFromGray = compactLayout
-          ? availableHeight - grayscaleRect.height - grayscaleGap
-          : availableHeight;
-        const proportionalCap = compactLayout ? sectionRect.width * 0.8 : sectionRect.width * 0.7;
-        const cssSize = Math.floor(Math.min(
-          availableWidth,
-          availableHeight,
-          widthLimitFromGray,
-          heightLimitFromGray,
-          proportionalCap
-        ));
+      // ── Canvas Sizing & Rendering ─────────────────────────────
+      function snapHalf(v) {
+        return Math.round(v * 2) / 2;
+      }
 
-        if (cssSize <= 0) {
-          return;
-        }
+      function computeCanvasSize() {
+        const rect = wheelStage.getBoundingClientRect();
+        const style = window.getComputedStyle(wheelStage);
+        const padX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+        const padY = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
+        const cssSize = Math.floor(Math.min(rect.width - padX, rect.height - padY, 540));
 
-        wheelWrap.style.setProperty("--wheel-size", `${cssSize}px`);
+        if (cssSize <= 32) return false;
 
         const dpr = window.devicePixelRatio || 1;
         const pixelSize = Math.max(1, Math.floor(cssSize * dpr));
+        if (pixelSize === state.size && dpr === state.dpr && cssSize === state.cssSize) {
+          return false;
+        }
 
         state.dpr = dpr;
+        state.cssSize = cssSize;
         state.size = pixelSize;
         state.center = pixelSize / 2;
-        // Leave headroom inside the canvas for the lifted-segment
-        // effect (offset + expanded radius + strokes). With the wheel
-        // radius equal to half the canvas, lifted segments at the top
-        // and left were clipped flat by the canvas boundary.
-        const liftPad = Math.ceil(Math.max(12 * dpr, pixelSize * 0.03));
-        state.radius = pixelSize / 2 - liftPad;
-        state.innerRadius = snapRadius(state.radius * 0.3);
-        state.wheelThickness = snapRadius(state.radius - state.innerRadius);
-        state.ringWidth = state.wheelThickness / RINGS;
-        state.segmentMidpointInset = Math.min(state.segmentStep * 0.02, Math.PI / 720);
-        state.ringBrightnesses = Array.from({ length: RINGS }, function (_value, ring) {
-          return brightnessForRing(ring);
-        });
-        state.ringRadii = Array.from({ length: RINGS + 1 }, function (_value, index) {
-          const raw = state.innerRadius + index * state.ringWidth;
-          return index === RINGS ? state.radius : snapRadius(raw);
-        });
 
+        // Reserve outer margin for precision dial ticks, cardinal labels & rotating pointer
+        const outerPad = Math.ceil(Math.max(36 * dpr, pixelSize * 0.088));
+        state.radius = pixelSize / 2 - outerPad;
+        state.innerRadius = snapHalf(state.radius * 0.29);
+        const thickness = state.radius - state.innerRadius;
+        state.ringWidth = thickness / RINGS;
+        state.tileGap = Math.max(1.6 * dpr, Math.min(2.4 * dpr, state.radius * 0.011));
+
+        state.ringRadii = Array.from({ length: RINGS + 1 }, (_, i) =>
+          i === RINGS ? state.radius : snapHalf(state.innerRadius + i * state.ringWidth)
+        );
+
+        wheelWrap.style.setProperty("--wheel-size", `${cssSize}px`);
         canvas.width = pixelSize;
         canvas.height = pixelSize;
-        canvas.style.width = `${cssSize}px`;
-        canvas.style.height = `${cssSize}px`;
-
         state.wheelBuffer.width = pixelSize;
         state.wheelBuffer.height = pixelSize;
+        return true;
       }
 
       function drawWheelBitmap() {
         const bctx = state.wheelBuffer.getContext("2d");
+        const c = state.center;
+        const dpr = state.dpr;
         bctx.clearRect(0, 0, state.size, state.size);
-        bctx.globalCompositeOperation = "destination-over";
-        bctx.fillStyle = "rgba(0,0,0,0)";
-        bctx.fillRect(0, 0, state.size, state.size);
-        bctx.globalCompositeOperation = "source-over";
-        const center = state.center;
 
-        for (let ring = 0; ring < RINGS; ring += 1) {
-          const { inner, outer } = getRingGeometry(ring);
+        // 1. Fill all 96 chromatic cells tightly first
+        const angleOverlap = 0.004;
+        for (let r = RINGS - 1; r >= 0; r -= 1) {
+          const inner = state.ringRadii[r];
+          const outer = state.ringRadii[r + 1] + (r < RINGS - 1 ? 0.65 * dpr : 0);
 
-          for (let segment = 0; segment < SEGMENTS; segment += 1) {
-            const start = angleForSegmentStart(segment);
-            const end = start + state.segmentStep;
-            const rgb = segmentRgbFor(segment, ring);
-
+          for (let s = 0; s < SEGMENTS; s += 1) {
+            const start = START_ANGLE + s * SEGMENT_STEP;
+            const end = start + SEGMENT_STEP + angleOverlap;
             bctx.beginPath();
-            bctx.arc(center, center, outer, start, end);
-            bctx.arc(center, center, Math.max(0, inner), end, start, true);
+            bctx.arc(c, c, outer, start, end);
+            bctx.arc(c, c, inner, end, start, true);
             bctx.closePath();
-            bctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            bctx.fillStyle = hexForCell(s, r);
             bctx.fill();
           }
         }
-      }
 
-      function getCurrentIndices() {
-        return {
-          segment: clamp(state.selectedSegment, 0, SEGMENTS - 1),
-          ring: getNearestRingForBrightness(state.brightness)
-        };
-      }
+        // 2. Carve uniform archival-paper seams between rings & sectors
+        bctx.save();
+        bctx.globalCompositeOperation = "destination-out";
+        bctx.strokeStyle = "#000000";
+        bctx.lineWidth = state.tileGap;
 
-      function getNearestRingForBrightness(brightness) {
-        let bestRing = 0;
-        let bestDiff = Infinity;
-
-        for (let ring = 0; ring < RINGS; ring += 1) {
-          const diff = Math.abs(brightness - state.ringBrightnesses[ring]);
-          if (diff < bestDiff) {
-            bestDiff = diff;
-            bestRing = ring;
-          }
+        for (let r = 1; r < RINGS; r += 1) {
+          bctx.beginPath();
+          bctx.arc(c, c, state.ringRadii[r], 0, TAU);
+          bctx.stroke();
         }
 
-        return bestRing;
+        for (let s = 0; s < SEGMENTS; s += 1) {
+          const angle = START_ANGLE + s * SEGMENT_STEP;
+          bctx.beginPath();
+          bctx.moveTo(c + Math.cos(angle) * (state.innerRadius - 1), c + Math.sin(angle) * (state.innerRadius - 1));
+          bctx.lineTo(c + Math.cos(angle) * (state.radius + 1), c + Math.sin(angle) * (state.radius + 1));
+          bctx.stroke();
+        }
+        bctx.restore();
+
+        // 3. Precision Bauhaus outer drafting dial (36 ticks + cardinal degree labels)
+        const dialR = state.radius + 6 * dpr;
+        bctx.strokeStyle = "rgba(20, 20, 19, 0.22)";
+        bctx.lineWidth = Math.max(1, dpr);
+        bctx.beginPath();
+        bctx.arc(c, c, dialR, 0, TAU);
+        bctx.stroke();
+
+        const totalTicks = 36;
+        for (let i = 0; i < totalTicks; i += 1) {
+          const angle = START_ANGLE + (i / totalTicks) * TAU;
+          const isCardinal = i % 9 === 0;
+          const isSector = i % 3 === 0;
+          const tickLen = isCardinal ? 8.5 * dpr : isSector ? 5.5 * dpr : 3 * dpr;
+
+          bctx.strokeStyle = isCardinal
+            ? "rgba(20, 20, 19, 0.85)"
+            : isSector
+              ? "rgba(20, 20, 19, 0.48)"
+              : "rgba(20, 20, 19, 0.22)";
+          bctx.lineWidth = isCardinal ? Math.max(1.3, 1.5 * dpr) : Math.max(1, dpr);
+          bctx.beginPath();
+          bctx.moveTo(c + Math.cos(angle) * dialR, c + Math.sin(angle) * dialR);
+          bctx.lineTo(c + Math.cos(angle) * (dialR + tickLen), c + Math.sin(angle) * (dialR + tickLen));
+          bctx.stroke();
+        }
+
+        const labelDist = dialR + 11.5 * dpr;
+        bctx.fillStyle = "#5a564e";
+        bctx.font = `700 ${Math.round(9.5 * dpr)}px "SF Mono", "Menlo", monospace`;
+
+        bctx.textAlign = "center";
+        bctx.textBaseline = "bottom";
+        bctx.fillText("0°", c, c - labelDist);
+
+        bctx.textAlign = "left";
+        bctx.textBaseline = "middle";
+        bctx.fillText("90°", c + labelDist, c);
+
+        bctx.textAlign = "center";
+        bctx.textBaseline = "top";
+        bctx.fillText("180°", c, c + labelDist);
+
+        bctx.textAlign = "right";
+        bctx.textBaseline = "middle";
+        bctx.fillText("270°", c - labelDist, c);
       }
 
-      function pointForSegmentRing(segment, ring) {
-        const { inner, outer, mid } = getRingGeometry(ring);
-        const angle = angleForSegmentMidpoint(segment);
-        const radius = inner === outer ? mid : (2 / 3) * ((outer * outer * outer) - (inner * inner * inner)) / ((outer * outer) - (inner * inner));
-        return {
-          x: state.center + Math.cos(angle) * radius,
-          y: state.center + Math.sin(angle) * radius
-        };
-      }
-
-      function segmentLiftOffset(intensity) {
-        const lift = Math.max(2, state.dpr * 2.2) * intensity;
-        return { x: -lift, y: -lift };
-      }
-
-      function traceSegmentPath(centerX, centerY, inner, outer, start, end) {
+      function traceTile(cx, cy, inner, outer, start, end, radialInset = 0, arcInset = 0) {
+        const rIn = Math.max(0, inner + radialInset);
+        const rOut = Math.max(rIn + 1, outer - radialInset);
+        const rMid = (rIn + rOut) * 0.5;
+        const dAng = Math.min((end - start) * 0.42, arcInset / Math.max(1, rMid));
         ctx.beginPath();
-        ctx.arc(centerX, centerY, outer, start, end);
-        ctx.arc(centerX, centerY, Math.max(0, inner), end, start, true);
+        ctx.arc(cx, cy, rOut, start + dAng, end - dAng);
+        ctx.arc(cx, cy, rIn, end - dAng, start + dAng, true);
         ctx.closePath();
       }
 
-      function drawLiftedSegment(segment, ring, intensity) {
-        if (intensity <= 0) {
-          return;
-        }
+      function drawActiveCell(segment, ring, intensity, isSelected) {
+        if (intensity <= 0.005) return;
+        const inner = state.ringRadii[ring];
+        const outer = state.ringRadii[ring + 1];
+        const start = START_ANGLE + segment * SEGMENT_STEP;
+        const end = start + SEGMENT_STEP;
+        const halfGap = state.tileGap * 0.5;
+        const tileInner = inner + (ring === 0 ? 0 : halfGap);
+        const tileOuter = outer - (ring === RINGS - 1 ? 0 : halfGap);
 
-        const { inner, outer } = getRingGeometry(ring);
-        const start = angleForSegmentStart(segment);
-        const end = start + state.segmentStep;
-        const rgb = segmentRgbFor(segment, ring);
-        const offset = segmentLiftOffset(intensity);
-        const expand = Math.max(1.2, state.dpr * 1.15) * intensity;
+        // Strictly concentric micro-expansion into the paper seam (no diagonal shift)
+        const expand = halfGap * (isSelected ? 0.9 : 0.55) * Math.min(1.25, intensity);
+        const hex = hexForCell(segment, ring);
+        const { ink } = bestInkFor(hexToRgb(hex));
 
-        traceSegmentPath(
-          state.center + offset.x,
-          state.center + offset.y,
-          Math.max(0, inner - expand * 0.35),
-          outer + expand,
+        traceTile(
+          state.center,
+          state.center,
+          Math.max(0, tileInner - expand),
+          tileOuter + expand,
           start,
-          end
+          end,
+          0,
+          Math.max(0, halfGap - expand)
         );
-        ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.96 + 0.04 * intensity})`;
+        ctx.fillStyle = hex;
         ctx.fill();
 
-        traceSegmentPath(
-          state.center + offset.x,
-          state.center + offset.y,
-          Math.max(0, inner - expand * 0.2),
-          outer + expand * 0.82,
-          start,
-          end
-        );
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.88)";
-        ctx.lineWidth = Math.max(1.2, state.dpr * (1.25 + intensity * 0.55));
+        ctx.strokeStyle = "#141413";
+        ctx.lineWidth = isSelected
+          ? Math.max(2, state.dpr * 2.2)
+          : Math.max(1.2, state.dpr * 1.5);
         ctx.stroke();
 
-        traceSegmentPath(
-          state.center + offset.x,
-          state.center + offset.y,
-          Math.max(0, inner + Math.max(0.6, expand * 0.1)),
-          Math.max(inner + 1, outer - Math.max(0.8, expand * 0.22)),
-          start,
-          end
-        );
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.96)";
-        ctx.lineWidth = Math.max(0.9, state.dpr * (0.85 + intensity * 0.35));
-        ctx.stroke();
-      }
-
-      function drawHarmonyMarkers() {
-        if (!state.harmonyPoints.length) {
-          return;
-        }
-
-        const base = Math.max(2, state.dpr * 2.25);
-
-        for (const point of state.harmonyPoints) {
-          const pos = pointForSegmentRing(point.segment, point.ring);
-          const isHoverMatch = samePoint(point, state.hoverDisplayPoint);
-          const hoverAmount = isHoverMatch ? state.hoverProgress : 0;
-          const offset = segmentLiftOffset(hoverAmount * 0.9);
-          drawMarker(pos.x + offset.x, pos.y + offset.y, base + hoverAmount * state.dpr, point.hex);
+        // Subtle crisp white inner hairline on dark tiles (matches grayscale selection)
+        if (isSelected && ink === "#FFFFFF") {
+          traceTile(
+            state.center,
+            state.center,
+            tileInner + state.dpr * 1.2,
+            tileOuter - state.dpr * 1.2,
+            start,
+            end,
+            0,
+            halfGap + state.dpr * 1.4
+          );
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+          ctx.lineWidth = Math.max(0.9, state.dpr);
+          ctx.stroke();
         }
       }
 
-      function drawMarker(x, y, radius, fill) {
+      function drawHarmonyIndicators() {
+        if (!state.harmonyPoints.length) return;
+        const dpr = state.dpr;
+        const halfGap = state.tileGap * 0.5;
+        const frameInset = Math.min(3 * dpr, state.ringWidth * 0.22);
+        const dialR = state.radius + 6 * dpr;
+
+        for (const pt of state.harmonyPoints) {
+          const inner = state.ringRadii[pt.ring] + (pt.ring === 0 ? 0 : halfGap);
+          const outer = state.ringRadii[pt.ring + 1] - (pt.ring === RINGS - 1 ? 0 : halfGap);
+          const start = START_ANGLE + pt.segment * SEGMENT_STEP;
+          const end = start + SEGMENT_STEP;
+          const { ink } = bestInkFor(hexToRgb(pt.hex));
+
+          // Clean concentric inset contour frame following the curved tile
+          traceTile(
+            state.center,
+            state.center,
+            inner,
+            outer,
+            start,
+            end,
+            frameInset,
+            halfGap + frameInset
+          );
+          ctx.strokeStyle = ink === "#FFFFFF" ? "rgba(255, 255, 255, 0.9)" : "rgba(20, 20, 19, 0.82)";
+          ctx.lineWidth = Math.max(1.1, 1.35 * dpr);
+          ctx.stroke();
+
+          // Subtle geometric marker on outer calibration dial at harmony sector midpoint
+          const midAngle = start + SEGMENT_STEP * 0.5;
+          const rel = mod(pt.segment - state.segment, SEGMENTS);
+          const mx = state.center + Math.cos(midAngle) * (dialR + 4.5 * dpr);
+          const my = state.center + Math.sin(midAngle) * (dialR + 4.5 * dpr);
+
+          ctx.save();
+          ctx.translate(mx, my);
+          ctx.rotate(midAngle + Math.PI / 2);
+          if (rel === 6) {
+            // Complementary: crisp solid Bauhaus square
+            const s = 4.6 * dpr;
+            ctx.fillStyle = "#141413";
+            ctx.fillRect(-s / 2, -s / 2, s, s);
+          } else if (rel === 4 || rel === 8) {
+            // Triadic: crisp hollow Bauhaus square
+            const s = 4.4 * dpr;
+            ctx.fillStyle = "#faf8f2";
+            ctx.strokeStyle = "#141413";
+            ctx.lineWidth = Math.max(1.1, 1.35 * dpr);
+            ctx.fillRect(-s / 2, -s / 2, s, s);
+            ctx.strokeRect(-s / 2, -s / 2, s, s);
+          } else {
+            // Analogous: short crisp radial bar
+            ctx.strokeStyle = "#141413";
+            ctx.lineWidth = Math.max(1.4, 1.7 * dpr);
+            ctx.beginPath();
+            ctx.moveTo(0, -2.5 * dpr);
+            ctx.lineTo(0, 2.5 * dpr);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+
+      function drawHuePointer() {
+        const dpr = state.dpr;
+        const angle = START_ANGLE + (state.segment + 0.5) * SEGMENT_STEP;
+        const tipR = state.radius + 3 * dpr;
+        const baseR = state.radius + 12.5 * dpr;
+        const halfW = 4.8 * dpr;
+
+        ctx.save();
+        ctx.translate(state.center, state.center);
+        ctx.rotate(angle);
         ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = fill;
+        ctx.moveTo(tipR, 0);
+        ctx.lineTo(baseR, -halfW);
+        ctx.lineTo(baseR, halfW);
+        ctx.closePath();
+        ctx.fillStyle = "#d92b24";
         ctx.fill();
+        ctx.strokeStyle = "#141413";
+        ctx.lineWidth = Math.max(1.2, 1.5 * dpr);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawCenterMedallion() {
+        const c = state.center;
+        const dpr = state.dpr;
+        const hex = currentHex();
+        const rgb = currentRgb();
+        const { ink } = bestInkFor(rgb);
+        const discRadius = Math.max(8, state.innerRadius - 6 * dpr);
 
         ctx.beginPath();
-        ctx.arc(x, y, radius + Math.max(1, state.dpr * 0.8), 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.8)";
-        ctx.lineWidth = Math.max(1, state.dpr);
+        ctx.arc(c, c, discRadius, 0, TAU);
+        ctx.fillStyle = hex;
+        ctx.fill();
+        ctx.strokeStyle = "#141413";
+        ctx.lineWidth = Math.max(1.4, 2 * dpr);
         ctx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(x, y, Math.max(1, radius - Math.max(0.6, state.dpr * 0.5)), 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
-        ctx.lineWidth = Math.max(1, state.dpr * 0.8);
-        ctx.stroke();
+        if (discRadius >= 26 * dpr) {
+          ctx.fillStyle = ink;
+          ctx.font = `700 ${Math.round(Math.min(12 * dpr, discRadius * 0.34))}px "SF Mono", "Menlo", monospace`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(hex, c, c);
+        }
       }
 
-      function drawSelectionIndicator() {
-        if (state.selectionMode !== "wheel") {
-          return;
-        }
-        const { segment, ring } = getCurrentIndices();
-        const selectionIntensity = 1 + state.selectionPulse * 0.45;
-        drawLiftedSegment(segment, ring, selectionIntensity);
-
-        const pos = pointForSegmentRing(segment, ring);
-        const offset = segmentLiftOffset(selectionIntensity * 0.95);
-        drawMarker(
-          pos.x + offset.x,
-          pos.y + offset.y,
-          Math.max(2.4, state.dpr * (2.5 + state.selectionPulse * 0.65)),
-          selectionHex()
-        );
-      }
-
-      function drawHoverIndicator() {
-        if (!state.hoverDisplayPoint || state.hoverProgress <= 0.01) {
-          return;
-        }
-
-        if (state.selectionMode === "wheel" && samePoint(state.hoverDisplayPoint, getCurrentIndices())) {
-          return;
-        }
-
-        drawLiftedSegment(state.hoverDisplayPoint.segment, state.hoverDisplayPoint.ring, state.hoverProgress * 0.92);
-      }
-
-      function renderSelectionLayer() {
+      function renderCanvas() {
+        if (!state.size) return;
         ctx.clearRect(0, 0, state.size, state.size);
         ctx.drawImage(state.wheelBuffer, 0, 0);
-        drawHoverIndicator();
-        drawHarmonyMarkers();
-        drawSelectionIndicator();
+
+        // Hover cell (in-place crisp frame, when not the selected cell)
+        if (state.hoverDisplay && state.hoverProgress > 0.01) {
+          const isSelected = state.mode === "wheel" && sameCell(state.hoverDisplay, state);
+          if (!isSelected) {
+            drawActiveCell(state.hoverDisplay.segment, state.hoverDisplay.ring, state.hoverProgress, false);
+          }
+        }
+
+        // Harmony tile frames & outer dial geometry markers
+        if (state.mode === "wheel") {
+          drawHarmonyIndicators();
+        }
+
+        // Selected cell (concentric in-place frame) + outer red pointer
+        if (state.mode === "wheel") {
+          const intensity = 1 + state.pulse * 0.3;
+          drawActiveCell(state.segment, state.ring, intensity, true);
+          drawHuePointer();
+        }
+
+        drawCenterMedallion();
+      }
+
+      // ── Frame-Rate-Independent Animation Loop ─────────────────
+      function scheduleAnimation() {
+        if (state.animFrame) return;
+        state.lastAnimTime = performance.now();
+
+        state.animFrame = window.requestAnimationFrame(function step(now) {
+          state.animFrame = 0;
+          const dt = Math.min(0.05, Math.max(0.001, (now - state.lastAnimTime) / 1000));
+          state.lastAnimTime = now;
+
+          const instant = REDUCED_MOTION.matches;
+          let keepGoing = false;
+
+          const hoverTarget = state.hovered ? 1 : 0;
+          if (instant) {
+            state.hoverProgress = hoverTarget;
+          } else {
+            const factor = 1 - Math.exp(-18 * dt);
+            state.hoverProgress += (hoverTarget - state.hoverProgress) * factor;
+            if (Math.abs(hoverTarget - state.hoverProgress) > 0.008) {
+              keepGoing = true;
+            } else {
+              state.hoverProgress = hoverTarget;
+            }
+          }
+
+          if (!state.hovered && state.hoverProgress <= 0.01) {
+            state.hoverProgress = 0;
+            state.hoverDisplay = null;
+          }
+
+          if (instant) {
+            state.pulse = 0;
+          } else if (state.pulse > 0.008) {
+            state.pulse *= Math.exp(-16 * dt);
+            keepGoing = true;
+          } else {
+            state.pulse = 0;
+          }
+
+          renderCanvas();
+          if (keepGoing) scheduleAnimation();
+        });
+      }
+
+      // ── UI Rendering (Minimal DOM churn) ──────────────────────
+      function buildGrayscaleBarOnce() {
+        const frag = document.createDocumentFragment();
+        GRAYSCALE_VALUES.forEach((hex, idx) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "gray-chip";
+          btn.style.backgroundColor = hex;
+          btn.dataset.tip = hex;
+          btn.setAttribute("aria-label", `Select grayscale ${hex}`);
+          btn.setAttribute("aria-pressed", "false");
+          btn.addEventListener("click", () => selectGrayscale(idx, true));
+          grayChipEls.push(btn);
+          frag.appendChild(btn);
+        });
+        grayscaleBarEl.appendChild(frag);
+      }
+
+      function syncGrayscaleBar() {
+        grayChipEls.forEach((btn, idx) => {
+          const active = state.mode === "grayscale" && state.grayIndex === idx;
+          btn.classList.toggle("is-selected", active);
+          btn.setAttribute("aria-pressed", String(active));
+        });
       }
 
       function renderInfoPanel() {
-        const rgb = selectionColor();
-        const hex = rgbToHex(rgb);
-        const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-        const isGray = state.selectionMode === "grayscale";
-        const hueDeg = isGray ? 0 : Math.round(state.hue * 360) % 360;
-        const brightnessPct = isGray ? Math.round((Math.max(rgb.r, rgb.g, rgb.b) / 255) * 100) : Math.round(state.brightness * 100);
+        const hex = currentHex();
+        const rgb = currentRgb();
+        const hsl = rgbToHsl(rgb);
+        const hsb = rgbToHsb(rgb);
+        const contrast = bestInkFor(rgb);
+        const isGray = state.mode === "grayscale";
 
         previewEl.style.backgroundColor = hex;
+        previewEl.style.color = contrast.ink;
+        previewHexBigEl.textContent = hex;
+        previewContrastEl.textContent = `${contrast.label} ${contrast.ratio.toFixed(1)}:1`;
+        previewCoordsEl.textContent = isGray
+          ? `GRAY · ${String(state.grayIndex + 1).padStart(2, "0")}/10`
+          : `H${String(state.segment + 1).padStart(2, "0")} · R${String(state.ring + 1).padStart(2, "0")}`;
+
+        if (document.activeElement !== hexInput) {
+          hexInput.value = hex;
+        }
+
         hexValueEl.textContent = hex;
-        rgbValueEl.textContent = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-        hslValueEl.textContent = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
-        hueValueEl.textContent = isGray ? "Gray" : `${hueDeg}deg`;
-        brightnessValueEl.textContent = `${brightnessPct}%`;
+        rgbValueEl.textContent = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+        hslValueEl.textContent = `${hsl.h}, ${hsl.s}%, ${hsl.l}%`;
+        hsbValueEl.textContent = `${hsb.h}, ${hsb.s}%, ${hsb.b}%`;
+        toneValueEl.textContent = isGray
+          ? `Achromatic Step ${state.grayIndex + 1}/10`
+          : `${RING_NAMES[state.ring]} (Ring ${state.ring + 1}/${RINGS})`;
       }
 
-      function makeHarmonyChip(hex, onClick) {
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "chip";
-        chip.style.backgroundColor = hex;
-        chip.setAttribute("data-tip", hex);
-        chip.setAttribute("aria-label", `Copy harmony color ${hex}`);
-        chip.addEventListener("click", function (event) {
-          event.preventDefault();
-          event.stopPropagation();
-          onClick(event);
-        });
-        return chip;
+      function createHarmonyRow(title, degText, swatches) {
+        const line = document.createElement("div");
+        line.className = "harmony-line";
+
+        const label = document.createElement("div");
+        label.className = "harmony-label";
+        const nameEl = document.createElement("span");
+        nameEl.className = "harmony-name";
+        nameEl.textContent = title;
+        const degEl = document.createElement("span");
+        degEl.className = "harmony-deg";
+        degEl.textContent = degText;
+        label.append(nameEl, degEl);
+
+        const list = document.createElement("div");
+        list.className = "harmony-swatches";
+
+        for (const item of swatches) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "harmony-chip";
+          btn.style.backgroundColor = item.hex;
+          btn.style.color = bestInkFor(hexToRgb(item.hex)).ink;
+          btn.setAttribute("aria-label", `${title} ${item.role} ${item.hex}. Click to copy, Shift+Click to select.`);
+
+          const hexSpan = document.createElement("span");
+          hexSpan.className = "harmony-chip-hex";
+          hexSpan.textContent = item.hex;
+          const roleSpan = document.createElement("span");
+          roleSpan.className = "harmony-chip-role";
+          roleSpan.textContent = item.role;
+          btn.append(hexSpan, roleSpan);
+
+          btn.addEventListener("click", (event) => {
+            if (event.shiftKey && typeof item.onSelect === "function") {
+              item.onSelect();
+            } else {
+              copyText(item.hex, item.hex, false);
+            }
+          });
+          list.appendChild(btn);
+        }
+
+        line.append(label, list);
+        return line;
       }
 
       function renderHarmony() {
-        harmonyGridEl.textContent = "";
+        const frag = document.createDocumentFragment();
         state.harmonyPoints = [];
-        if (state.selectionMode !== "wheel") {
+
+        if (state.mode === "grayscale") {
+          harmonyHintEl.textContent = "Achromatic scale · Click to copy · Shift+Click to jump";
+          const i = state.grayIndex;
+          const stepIndices = [clamp(i - 2, 0, 9), clamp(i - 1, 0, 9), i, clamp(i + 1, 0, 9), clamp(i + 2, 0, 9)];
+          const uniqueSteps = [...new Set(stepIndices)];
+          const neighborSwatches = uniqueSteps.map((idx) => ({
+            hex: GRAYSCALE_VALUES[idx],
+            role: idx === i ? "Selected" : `Step ${idx + 1}`,
+            onSelect: () => selectGrayscale(idx, true)
+          }));
+          frag.appendChild(createHarmonyRow("Achromatic Steps", "NEUTRAL", neighborSwatches));
+
+          const bauhausSwatches = [
+            { hex: "#D92B24", role: "Vermilion", onSelect: () => matchNearestColor("#D92B24") },
+            { hex: "#F2BE1A", role: "Cadmium", onSelect: () => matchNearestColor("#F2BE1A") },
+            { hex: "#1448B8", role: "Ultramarine", onSelect: () => matchNearestColor("#1448B8") }
+          ];
+          frag.appendChild(createHarmonyRow("Bauhaus Accents", "TRIAD", bauhausSwatches));
+          harmonyGridEl.replaceChildren(frag);
           return;
         }
-        const { segment: baseSegment, ring } = getCurrentIndices();
+
+        harmonyHintEl.textContent = "Click to copy · Shift+Click to select";
+        const baseSeg = state.segment;
+        const ring = state.ring;
 
         for (const group of HARMONY_GROUPS) {
-          const line = document.createElement("div");
-          line.className = "harmony-line";
-
-          const label = document.createElement("div");
-          label.className = "harmony-label";
-          label.textContent = group.name;
-
-          const swatches = document.createElement("div");
-          swatches.className = "harmony-swatches";
-
-          for (const offset of group.offsets) {
-            const segmentOffset = Math.round((offset / 360) * HUE_SEGMENTS);
-            const segment = (baseSegment + segmentOffset + SEGMENTS) % SEGMENTS;
-            const rgb = segmentRgbFor(segment, ring);
-            const hex = rgbToHex(rgb);
-            state.harmonyPoints.push({ segment, ring, hex });
-            swatches.appendChild(makeHarmonyChip(hex, function () {
-              copyHexValue(hex, false);
-            }));
-          }
-
-          line.appendChild(label);
-          line.appendChild(swatches);
-          harmonyGridEl.appendChild(line);
-        }
-      }
-
-      function renderGrayscaleBar() {
-        grayscaleBarEl.textContent = "";
-
-        for (const hex of GRAYSCALE_VALUES) {
-          const chip = document.createElement("button");
-          chip.type = "button";
-          chip.className = "gray-chip";
-          if (state.selectionMode === "grayscale" && state.selectedGrayHex === hex) {
-            chip.classList.add("is-selected");
-          }
-          chip.style.backgroundColor = hex;
-          chip.setAttribute("data-tip", hex);
-          chip.setAttribute("aria-label", `Select grayscale ${hex}`);
-          chip.title = hex;
-          chip.addEventListener("click", function () {
-            setSelectionByGrayHex(hex, true);
+          const swatches = group.offsets.map((offset) => {
+            const seg = mod(baseSeg + offset, SEGMENTS);
+            const hex = hexForCell(seg, ring);
+            state.harmonyPoints.push({ segment: seg, ring, hex });
+            const deg = offset * 30;
+            return {
+              hex,
+              role: `${deg > 0 ? "+" : ""}${deg}°`,
+              onSelect: () => selectWheelCell(seg, ring, true)
+            };
           });
-          grayscaleBarEl.appendChild(chip);
+          frag.appendChild(createHarmonyRow(group.name, group.deg, swatches));
+        }
+
+        harmonyGridEl.replaceChildren(frag);
+      }
+
+      // ── Selection Actions ─────────────────────────────────────
+      function applySelection(shouldPulse, syncUrl) {
+        renderHarmony();
+        renderInfoPanel();
+        syncGrayscaleBar();
+        if (shouldPulse && state.mode === "wheel" && !REDUCED_MOTION.matches) {
+          state.pulse = 1;
+          scheduleAnimation();
+        } else {
+          renderCanvas();
+        }
+        if (syncUrl) {
+          scheduleUrlSync();
         }
       }
 
-      function pickFromCanvas(clientX, clientY) {
-        const rect = canvas.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-        const cssCenter = rect.width / 2;
-        const deviceToCss = rect.width / canvas.width;
-        const innerRadiusCss = state.ringRadii[0] * deviceToCss;
-        const outerRadiusCss = state.ringRadii[RINGS] * deviceToCss;
-        const dx = x - cssCenter;
-        const dy = y - cssCenter;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+      function selectWheelCell(segment, ring, withPulse) {
+        const nextSeg = mod(segment, SEGMENTS);
+        const nextRing = clamp(ring, 0, RINGS - 1);
+        if (state.mode === "wheel" && state.segment === nextSeg && state.ring === nextRing) {
+          return;
+        }
+        state.mode = "wheel";
+        state.segment = nextSeg;
+        state.ring = nextRing;
+        applySelection(withPulse, true);
+      }
 
-        if (distance > outerRadiusCss - GEOMETRY_EPSILON || distance < innerRadiusCss + GEOMETRY_EPSILON) {
+      function selectGrayscale(index, syncUrl = true) {
+        const nextIdx = clamp(index, 0, GRAYSCALE_VALUES.length - 1);
+        if (state.mode === "grayscale" && state.grayIndex === nextIdx) return;
+        state.mode = "grayscale";
+        state.grayIndex = nextIdx;
+        applySelection(false, syncUrl);
+      }
+
+      function matchNearestColor(rawHex) {
+        const target = hexToRgb(rawHex);
+        if (!target) {
+          showToast("Enter valid HEX (e.g. #FF6600)", null);
+          return;
+        }
+
+        let best = { mode: "wheel", segment: 0, ring: 4, dist: Infinity };
+        const distSq = (a, b) => (a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2;
+
+        for (let s = 0; s < SEGMENTS; s += 1) {
+          for (let r = 0; r < RINGS; r += 1) {
+            const rgb = hexToRgb(hexForCell(s, r));
+            const d = distSq(target, rgb);
+            if (d < best.dist) {
+              best = { mode: "wheel", segment: s, ring: r, dist: d };
+            }
+          }
+        }
+
+        GRAYSCALE_VALUES.forEach((hex, idx) => {
+          const d = distSq(target, hexToRgb(hex));
+          if (d < best.dist) {
+            best = { mode: "grayscale", grayIndex: idx, dist: d };
+          }
+        });
+
+        if (best.mode === "grayscale") {
+          selectGrayscale(best.grayIndex, true);
+        } else {
+          selectWheelCell(best.segment, best.ring, true);
+        }
+        hexInput.value = currentHex();
+        showToast(`Matched ${currentHex()}`, currentHex());
+      }
+
+      // ── Canvas Hit-Testing & Pointer Events ───────────────────
+      function pickCell(clientX, clientY) {
+        if (!state.size) return null;
+        const rect = canvas.getBoundingClientRect();
+        if (!rect.width) return null;
+
+        const scale = canvas.width / rect.width;
+        const dx = (clientX - rect.left) * scale - state.center;
+        const dy = (clientY - rect.top) * scale - state.center;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < state.innerRadius || dist >= state.radius) {
           return null;
         }
 
         let ring = -1;
-        for (let index = 0; index < RINGS; index += 1) {
-          const ringInnerCss = state.ringRadii[index] * deviceToCss;
-          const ringOuterCss = state.ringRadii[index + 1] * deviceToCss;
-          if (distance >= ringInnerCss - GEOMETRY_EPSILON && distance < ringOuterCss - GEOMETRY_EPSILON) {
-            ring = index;
+        for (let i = 0; i < RINGS; i += 1) {
+          if (dist >= state.ringRadii[i] && dist < state.ringRadii[i + 1]) {
+            ring = i;
             break;
           }
         }
+        if (ring === -1) return null;
 
-        if (ring < 0 || ring >= RINGS) {
-          return null;
-        }
-        const brightness = state.ringBrightnesses[ring];
-
-        const angle = normalizeAngle(Math.atan2(dy, dx) + Math.PI / 2 + state.segmentMidpointInset);
-
-        const segment = clamp(Math.floor(angle / state.segmentStep), 0, SEGMENTS - 1);
-        const hue = hueForSegment(segment);
-
-        return { hue, brightness, segment, ring };
+        const angle = mod(Math.atan2(dy, dx) - START_ANGLE, TAU);
+        const segment = clamp(Math.floor(angle / SEGMENT_STEP), 0, SEGMENTS - 1);
+        return { segment, ring };
       }
 
-      function showCanvasTip(text, clientX, clientY) {
-        canvasTip.textContent = text;
-        canvasTip.style.left = `${clientX}px`;
-        canvasTip.style.top = `${clientY}px`;
+      function setHovered(cell) {
+        if (sameCell(cell, state.hovered)) return;
+        state.hovered = cell;
+        if (cell) {
+          state.hoverDisplay = { segment: cell.segment, ring: cell.ring };
+          if (state.hoverProgress > 0.25) state.hoverProgress = 0.25;
+        }
+        scheduleAnimation();
+      }
+
+      function showCanvasTip(hex, x, y) {
+        const flipBelow = y < 44;
+        canvasTipDot.style.backgroundColor = hex;
+        canvasTipText.textContent = hex;
+        canvasTip.style.left = `${x}px`;
+        canvasTip.style.top = `${flipBelow ? y + 10 : y - 8}px`;
+        canvasTip.style.transform = flipBelow ? "translate(-50%, 25%)" : "translate(-50%, -135%)";
         canvasTip.classList.add("show");
       }
 
@@ -1464,226 +2071,198 @@
         canvasTip.classList.remove("show");
       }
 
-      function setCanvasCursor(isInteractive) {
-        canvas.style.cursor = isInteractive ? "crosshair" : "default";
-      }
+      function onPointerDown(event) {
+        if (event.button !== 0 && event.pointerType === "mouse") return;
+        const picked = pickCell(event.clientX, event.clientY);
+        if (!picked) return;
 
-      function scheduleEffectAnimation() {
-        if (state.effectFrame) {
-          return;
+        state.isDragging = true;
+        lastInputWasKeyboard = false;
+        canvas.classList.remove("is-keyboard-focus");
+        try {
+          canvas.setPointerCapture(event.pointerId);
+        } catch (_err) {
+          // Ignore unsupported pointer capture
         }
-
-        state.effectFrame = window.requestAnimationFrame(function animateEffects() {
-          state.effectFrame = 0;
-          let shouldContinue = false;
-          const hoverTarget = state.hoveredPoint ? 1 : 0;
-          const hoverDelta = hoverTarget - state.hoverProgress;
-
-          if (Math.abs(hoverDelta) > 0.01) {
-            state.hoverProgress += hoverDelta * 0.24;
-            shouldContinue = true;
-          } else if (state.hoverProgress !== hoverTarget) {
-            state.hoverProgress = hoverTarget;
-          }
-
-          if (!state.hoveredPoint && state.hoverProgress <= 0.01) {
-            state.hoverProgress = 0;
-            state.hoverDisplayPoint = null;
-          }
-
-          if (state.selectionPulse > 0.01) {
-            state.selectionPulse *= 0.74;
-            shouldContinue = true;
-          } else if (state.selectionPulse !== 0) {
-            state.selectionPulse = 0;
-          }
-
-          renderSelectionLayer();
-
-          if (shouldContinue) {
-            scheduleEffectAnimation();
-          }
-        });
+        canvas.focus({ preventScroll: true });
+        selectWheelCell(picked.segment, picked.ring, true);
       }
 
-      function setHoverPoint(point) {
-        if (samePoint(point, state.hoveredPoint)) {
-          return;
-        }
-
-        state.hoveredPoint = point ? { segment: point.segment, ring: point.ring } : null;
-
-        if (state.hoveredPoint) {
-          state.hoverDisplayPoint = { segment: state.hoveredPoint.segment, ring: state.hoveredPoint.ring };
-          if (state.hoverProgress > 0.18) {
-            state.hoverProgress = 0.18;
-          }
-        }
-
-        scheduleEffectAnimation();
-      }
-
-      function triggerSelectionPulse() {
-        state.selectionPulse = 1;
-        scheduleEffectAnimation();
-      }
-
-      function handleCanvasPointerMove(event) {
-        const picked = pickFromCanvas(event.clientX, event.clientY);
+      function onPointerMove(event) {
+        const picked = pickCell(event.clientX, event.clientY);
         if (!picked) {
-          setCanvasCursor(false);
-          setHoverPoint(null);
+          canvas.style.cursor = "default";
+          setHovered(null);
           hideCanvasTip();
           return;
         }
 
-        setCanvasCursor(true);
-        setHoverPoint(picked);
-        const rgb = segmentRgbFor(picked.segment, picked.ring);
-        const hex = rgbToHex(rgb);
-        showCanvasTip(hex, event.clientX, event.clientY - 6);
+        canvas.style.cursor = "crosshair";
+        setHovered(picked);
+        const hex = hexForCell(picked.segment, picked.ring);
+        showCanvasTip(hex, event.clientX, event.clientY);
 
-        if (isPointerDown) {
-          setSelectionBySegment(picked.segment, picked.brightness, true);
+        if (state.isDragging) {
+          selectWheelCell(picked.segment, picked.ring, false);
         }
       }
 
-      function handleCanvasPointerDown(event) {
-        const picked = pickFromCanvas(event.clientX, event.clientY);
-        if (!picked) {
-          return;
+      function onPointerUp(event) {
+        if (state.isDragging) {
+          state.isDragging = false;
+          try {
+            if (canvas.hasPointerCapture(event.pointerId)) {
+              canvas.releasePointerCapture(event.pointerId);
+            }
+          } catch (_err) {
+            // Ignore
+          }
         }
-        isPointerDown = true;
-        setSelectionBySegment(picked.segment, picked.brightness, true);
+        if (event.pointerType !== "mouse") {
+          clearHover();
+        }
       }
 
-      function handleCanvasPointerEnd() {
-        isPointerDown = false;
-      }
-
-      function clearCanvasHover() {
-        isPointerDown = false;
-        setCanvasCursor(false);
-        setHoverPoint(null);
+      function clearHover() {
+        canvas.style.cursor = "default";
+        setHovered(null);
         hideCanvasTip();
       }
 
-      async function copyHex() {
-        if (!state.hasExplicitSelection) {
-          copyBtn.textContent = "Select a color";
-          setTimeout(function () {
-            copyBtn.textContent = "Copy HEX";
-          }, 900);
+      // Scoped keyboard navigation when #wheel is focused
+      function onWheelKeyDown(event) {
+        if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          copyText(currentHex(), currentHex(), true);
           return;
         }
 
-        const hex = selectionHex();
-        await copyHexValue(hex, true);
-      }
-
-      function downloadPng() {
-        const rgb = selectionColor();
-        const exportCanvas = document.createElement("canvas");
-        exportCanvas.width = 1024;
-        exportCanvas.height = 1024;
-        const ectx = exportCanvas.getContext("2d");
-        ectx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-        ectx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-
-        const link = document.createElement("a");
-        link.download = `color-${selectionHex().slice(1)}.png`;
-        link.href = exportCanvas.toDataURL("image/png");
-        link.click();
-      }
-
-      function handleKey(event) {
-        if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) {
-          return;
-        }
-
-        const target = event.target;
-        if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
-          return;
-        }
-
-        // Left/Right move one hue segment; Up/Down move one
-        // brightness ring (ring 0 is the brightest).
-        const { segment, ring } = getCurrentIndices();
-        let nextSegment = segment;
-        let nextRing = ring;
+        let seg = state.segment;
+        let ring = state.ring;
 
         switch (event.key) {
-          case "ArrowLeft":
-            nextSegment = (segment - 1 + SEGMENTS) % SEGMENTS;
-            break;
           case "ArrowRight":
-            nextSegment = (segment + 1) % SEGMENTS;
+            seg = mod(seg + 1, SEGMENTS);
+            break;
+          case "ArrowLeft":
+            seg = mod(seg - 1, SEGMENTS);
             break;
           case "ArrowUp":
-            nextRing = clamp(ring - 1, 0, RINGS - 1);
+            ring = clamp(ring - 1, 0, RINGS - 1);
             break;
           case "ArrowDown":
-            nextRing = clamp(ring + 1, 0, RINGS - 1);
+            ring = clamp(ring + 1, 0, RINGS - 1);
             break;
           default:
             return;
         }
 
         event.preventDefault();
-        const nextBrightness = state.ringBrightnesses[nextRing];
-        setSelectionBySegment(
-          nextSegment,
-          typeof nextBrightness === "number" ? nextBrightness : state.brightness,
-          false
-        );
+        selectWheelCell(seg, ring, true);
+        srAnnounceEl.textContent = `Selected ${currentHex()}, ${RING_NAMES[state.ring]}`;
       }
 
-      function redrawWheelOnResize() {
-        initCanvasSize();
-        if (!state.size) {
-          return;
+      // ── Export PNG ────────────────────────────────────────────
+      function downloadPng() {
+        const hex = currentHex();
+        const exportCanvas = document.createElement("canvas");
+        exportCanvas.width = 1024;
+        exportCanvas.height = 1024;
+        const ectx = exportCanvas.getContext("2d");
+        ectx.fillStyle = hex;
+        ectx.fillRect(0, 0, 1024, 1024);
+
+        const filename = `color-${hex.slice(1)}.png`;
+        const triggerDownload = (href, revoke) => {
+          const link = document.createElement("a");
+          link.download = filename;
+          link.href = href;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          if (revoke) {
+            window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+          }
+          showToast(`Exported ${filename}`, hex);
+        };
+
+        if (exportCanvas.toBlob) {
+          exportCanvas.toBlob((blob) => {
+            if (!blob) return;
+            triggerDownload(URL.createObjectURL(blob), true);
+          }, "image/png");
+        } else {
+          triggerDownload(exportCanvas.toDataURL("image/png"), false);
         }
+      }
+
+      // ── Resize Handling ───────────────────────────────────────
+      function redrawIfResized() {
+        if (!computeCanvasSize()) return;
         drawWheelBitmap();
-        renderSelectionLayer();
+        renderCanvas();
       }
 
-      function scheduleWheelResize() {
-        if (resizeFrame) {
-          window.cancelAnimationFrame(resizeFrame);
-        }
-        resizeFrame = window.requestAnimationFrame(function () {
-          resizeFrame = 0;
-          redrawWheelOnResize();
+      function scheduleResize() {
+        if (state.resizeFrame) window.cancelAnimationFrame(state.resizeFrame);
+        state.resizeFrame = window.requestAnimationFrame(() => {
+          state.resizeFrame = 0;
+          redrawIfResized();
         });
       }
 
+      // ── Bootstrap ─────────────────────────────────────────────
       function init() {
-        getQueryState();
-        redrawWheelOnResize();
-        if (state.selectionMode === "grayscale" && state.selectedGrayHex) {
-          setSelectionByGrayHex(state.selectedGrayHex, false);
-        } else {
-          setSelection(state.hue, state.brightness, false);
-        }
+        loadFromUrl();
+        buildGrayscaleBarOnce();
+        redrawIfResized();
+        applySelection(false, false);
 
-        canvas.addEventListener("pointerdown", handleCanvasPointerDown);
-        canvas.addEventListener("pointermove", handleCanvasPointerMove);
-        canvas.addEventListener("pointerup", handleCanvasPointerEnd);
-        canvas.addEventListener("pointercancel", handleCanvasPointerEnd);
-        canvas.addEventListener("pointerleave", clearCanvasHover);
-        canvas.addEventListener("blur", clearCanvasHover);
+        canvas.addEventListener("pointerdown", onPointerDown);
+        canvas.addEventListener("pointermove", onPointerMove);
+        canvas.addEventListener("pointerup", onPointerUp);
+        canvas.addEventListener("pointercancel", onPointerUp);
+        canvas.addEventListener("pointerleave", clearHover);
+        canvas.addEventListener("keydown", onWheelKeyDown);
+        canvas.addEventListener("focus", () => {
+          canvas.classList.toggle("is-keyboard-focus", lastInputWasKeyboard);
+        });
+        canvas.addEventListener("blur", () => {
+          canvas.classList.remove("is-keyboard-focus");
+        });
 
-        window.addEventListener("keydown", handleKey);
-        if (typeof ResizeObserver === "function") {
-          const observer = new ResizeObserver(function () {
-            scheduleWheelResize();
-          });
-          observer.observe(wheelWrap);
-        }
+        window.addEventListener("keydown", (event) => {
+          if (event.key === "Tab") lastInputWasKeyboard = true;
+        }, true);
+        window.addEventListener("pointerdown", () => {
+          lastInputWasKeyboard = false;
+        }, true);
 
-        window.addEventListener("resize", scheduleWheelResize);
-        copyBtn.addEventListener("click", copyHex);
+        copyBtn.addEventListener("click", () => copyText(currentHex(), currentHex(), true));
         downloadBtn.addEventListener("click", downloadPng);
+
+        hexForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          matchNearestColor(hexInput.value);
+        });
+        hexInput.addEventListener("blur", () => {
+          hexInput.value = currentHex();
+        });
+
+        document.querySelectorAll(".stat-row[data-copy-target]").forEach((row) => {
+          row.addEventListener("click", () => {
+            const target = document.getElementById(row.dataset.copyTarget);
+            if (target) copyText(target.textContent, currentHex(), false);
+          });
+        });
+
+        if (typeof ResizeObserver === "function") {
+          const ro = new ResizeObserver(scheduleResize);
+          ro.observe(wheelStage);
+        }
+        window.addEventListener("resize", scheduleResize);
       }
 
       init();
