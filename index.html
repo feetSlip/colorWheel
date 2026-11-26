@@ -1287,6 +1287,11 @@
       // ── URL Sync (supports ?s=&r=, legacy ?h=&b=, and ?gray=) ─
       function loadFromUrl() {
         const params = new URLSearchParams(window.location.search);
+        const parseFiniteParam = (name) => {
+          const raw = params.get(name);
+          if (raw === null || raw.trim() === "") return NaN;
+          return Number(raw);
+        };
 
         const gray = params.get("gray");
         if (gray) {
@@ -1300,8 +1305,8 @@
         }
 
         if (params.has("s") || params.has("r")) {
-          const s = Number(params.get("s"));
-          const r = Number(params.get("r"));
+          const s = parseFiniteParam("s");
+          const r = parseFiniteParam("r");
           if (Number.isFinite(s)) state.segment = mod(Math.round(s), SEGMENTS);
           if (Number.isFinite(r)) state.ring = clamp(Math.round(r), 0, RINGS - 1);
           state.mode = "wheel";
@@ -1310,8 +1315,8 @@
 
         // Legacy ?h=0..360&b=0.1..1 compatibility
         if (params.has("h") || params.has("b")) {
-          const h = Number(params.get("h"));
-          const b = Number(params.get("b"));
+          const h = parseFiniteParam("h");
+          const b = parseFiniteParam("b");
           if (Number.isFinite(h)) {
             state.segment = mod(Math.round((h / 360) * SEGMENTS), SEGMENTS);
           }
@@ -1435,8 +1440,8 @@
         state.size = pixelSize;
         state.center = pixelSize / 2;
 
-        // Reserve outer margin for precision dial ticks, cardinal labels & rotating pointer
-        const outerPad = Math.ceil(Math.max(36 * dpr, pixelSize * 0.088));
+        // Reserve outer margin for precision dial ticks, cardinal labels (incl. "270°") & rotating pointer
+        const outerPad = Math.ceil(Math.max(48 * dpr, pixelSize * 0.088));
         state.radius = pixelSize / 2 - outerPad;
         state.innerRadius = snapHalf(state.radius * 0.29);
         const thickness = state.radius - state.innerRadius;
@@ -2243,11 +2248,34 @@
         copyBtn.addEventListener("click", () => copyText(currentHex(), currentHex(), true));
         downloadBtn.addEventListener("click", downloadPng);
 
+        let pendingHexSubmit = false;
+        const hexSubmitBtn = hexForm.querySelector('button[type="submit"]');
+        if (hexSubmitBtn) {
+          hexSubmitBtn.addEventListener("pointerdown", () => {
+            pendingHexSubmit = true;
+          });
+          const clearPendingHexSubmit = () => {
+            if (!pendingHexSubmit) return;
+            window.setTimeout(() => {
+              if (!pendingHexSubmit) return;
+              pendingHexSubmit = false;
+              if (!hexForm.contains(document.activeElement)) {
+                hexInput.value = currentHex();
+              }
+            }, 0);
+          };
+          window.addEventListener("pointerup", clearPendingHexSubmit);
+          window.addEventListener("pointercancel", clearPendingHexSubmit);
+        }
+
         hexForm.addEventListener("submit", (event) => {
           event.preventDefault();
+          pendingHexSubmit = false;
           matchNearestColor(hexInput.value);
         });
-        hexInput.addEventListener("blur", () => {
+        hexForm.addEventListener("focusout", (event) => {
+          if (pendingHexSubmit) return;
+          if (event.relatedTarget && hexForm.contains(event.relatedTarget)) return;
           hexInput.value = currentHex();
         });
 
